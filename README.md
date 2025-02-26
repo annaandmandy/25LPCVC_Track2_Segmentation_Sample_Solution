@@ -112,7 +112,7 @@ image_input = ImageList.from_tensors(images, size_divisibility=1024).tensor
 
 #### Text Processing
 - Uses OpenAI CLIP tokenizer
-- Format: `[text_embedding; attention_mask]`
+- Format: `[input_ids; attention_mask]`
 
 ```python
 # Text tokenization
