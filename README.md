@@ -27,7 +27,7 @@
 ## 2. Model Compilation and Profiling (Qualcomm AI Hub)
 For detailed instructions on model compilation, profiling and inference, refer to the [[AI Hub Documentation]](https://app.aihub.qualcomm.com/docs/).
 
-:point_right: ***LPCVC 2025 Track 2, Sample solution compilation, profiling and inference pipeline available in [[compile_profile_inference_aihub.py]](./compile_and_profile/compile_profile_inference_aihub.py)***
+:point_right: ***LPCVC 2025 Track 2, Sample solution compilation, profiling and inference pipeline available in [[compile_profile_inference_aihub]](./compile_and_profile)***. Run `python ./compile_and_profile/compile_profile_inference_aihub.py` to get your torch model inference, converting to onnx format, andn QNN model **compiling + profiling + inference** on AIHub all together.
 
 ```python
 # Submit compilation job to AIHub
@@ -51,7 +51,7 @@ profile_job = hub.submit_profile_job(
 
 ## 3. Inference and Evaluation
 
-:point_right: ***See [[compile_profile_inference_aihub.py]](./compile_and_profile/compile_profile_inference_aihub.py) for complete inference and evaluation pipeline.***
+:point_right: ***See [[compile_profile_inference_aihub]](./compile_and_profile) for complete inference and evaluation pipeline.***
 
 #### :warning: Important Note
 During evaluation, only the following inference commands will be used. Ensure your submitted model is correctly compiled and produces valid outputs on AIHub:
