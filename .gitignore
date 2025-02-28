@@ -112,3 +112,5 @@ data/*
 *.bin
 *.onnx
 *.txt
+
+lpcvc_env
