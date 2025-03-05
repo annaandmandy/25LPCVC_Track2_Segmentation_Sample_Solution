@@ -9,7 +9,9 @@ import os
 import sys
 import torch
 import logging
-import wandb
+import torch.distributed as dist
+import torch.multiprocessing as mp
+# import wandb
 
 from utils.arguments import load_opt_command
 
@@ -20,43 +22,46 @@ from utils.arguments import load_opt_command
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def init_wandb(args, job_dir, entity='xueyanz', project='xdecoder', job_name='tmp'):
-    wandb_dir = os.path.join(job_dir, 'wandb')
-    os.makedirs(wandb_dir, exist_ok=True)
-    runid = None
-    if os.path.exists(f"{wandb_dir}/runid.txt"):
-        runid = open(f"{wandb_dir}/runid.txt").read()
+# def init_wandb(args, job_dir, entity='xueyanz', project='xdecoder', job_name='tmp'):
+#     wandb_dir = os.path.join(job_dir, 'wandb')
+#     os.makedirs(wandb_dir, exist_ok=True)
+#     runid = None
+#     if os.path.exists(f"{wandb_dir}/runid.txt"):
+#         runid = open(f"{wandb_dir}/runid.txt").read()
 
-    wandb.init(project=project,
-            name=job_name,
-            dir=wandb_dir,
-            entity=entity,
-            resume="allow",
-            id=runid,
-            config={"hierarchical": True},)
+#     wandb.init(project=project,
+#             name=job_name,
+#             dir=wandb_dir,
+#             entity=entity,
+#             resume="allow",
+#             id=runid,
+#             config={"hierarchical": True},)
 
-    open(f"{wandb_dir}/runid.txt", 'w').write(wandb.run.id)
-    wandb.config.update({k: args[k] for k in args if k not in wandb.config})
+#     open(f"{wandb_dir}/runid.txt", 'w').write(wandb.run.id)
+#     wandb.config.update({k: args[k] for k in args if k not in wandb.config})
 
-def main(args=None):
-    '''
-    [Main function for the entry point]
-    1. Set environment variables for distributed training.
-    2. Load the config file and set up the trainer.
-    '''
+def setup_distributed(rank, world_size):
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12355'
+    dist.init_process_group("nccl", rank=rank, world_size=world_size)
 
+def cleanup():
+    dist.destroy_process_group()
+
+def main_worker(rank, world_size, args=None):
+    setup_distributed(rank, world_size)
+    
     opt, cmdline_args = load_opt_command(args)
     command = cmdline_args.command
-
+    
     if cmdline_args.user_dir:
         absolute_user_dir = os.path.abspath(cmdline_args.user_dir)
         opt['base_path'] = absolute_user_dir
 
-    # update_opt(opt, command)
-    world_size = 1
-    if 'OMPI_COMM_WORLD_SIZE' in os.environ:
-        world_size = int(os.environ['OMPI_COMM_WORLD_SIZE'])
-
+    opt['rank'] = rank
+    opt['local_rank'] = rank
+    opt['world_size'] = world_size
+    
     if opt['TRAINER'] == 'xdecoder':
         from trainer import XDecoder_Trainer as Trainer
     else:
@@ -66,14 +71,28 @@ def main(args=None):
     os.environ['TORCH_DISTRIBUTED_DEBUG']='DETAIL'
 
     if command == "train":
-        if opt['rank'] == 0 and opt['WANDB']:
-            wandb.login(key=os.environ['WANDB_KEY'])
-            init_wandb(opt, trainer.save_folder, job_name=trainer.save_folder)
+        # if opt['rank'] == 0 and opt['WANDB']:
+            # wandb.login(key=os.environ['WANDB_KEY'])
+            # init_wandb(opt, trainer.save_folder, job_name=trainer.save_folder)
         trainer.train()
     elif command == "evaluate":
         trainer.eval()
     else:
         raise ValueError(f"Unknown command: {command}")
+        
+    cleanup()
+
+def main(args=None):
+    n_gpus = torch.cuda.device_count()
+    if n_gpus < 1:
+        logger.error("No GPU available for distributed training")
+        return
+        
+    world_size = n_gpus
+    mp.spawn(main_worker,
+             args=(world_size, args),
+             nprocs=world_size,
+             join=True)
 
 if __name__ == "__main__":
     main()

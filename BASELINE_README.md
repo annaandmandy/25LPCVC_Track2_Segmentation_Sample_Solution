@@ -93,6 +93,10 @@ During training, refcoco ('refcocog_umd_val.json') is a good dataset used to eva
 - Training data: COCO
 - Evaluation data: RefCOCOg
 - Task: OV-Seg with text-prompt (Grounding)
+- Download pre-trained weights
+```sh
+xdecoder
+```
 
 ### 4. Getting Started
 - Training command: `sh command.sh`
