@@ -111,3 +111,5 @@ amlt/*
 data/*
 *.bin
 *.onnx
+
+xdecoder_data/coco
