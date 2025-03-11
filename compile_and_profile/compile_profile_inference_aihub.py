@@ -233,21 +233,21 @@ if __name__ == '__main__':
     image_input, text_input = prepare_data(image_path, text)
 
     # Step 2: Build model
-    model = build_model(image_input, text_input)
+    model = build_model(image_input, text_input, test_torch_model_local=True)
 
-    # Step 3: Convert to ONNX format
-    convert_torch_to_onnx_local(model, image_input, text_input, 
-                              output_path="./compile_and_profile/onnx", 
-                              test_onnx_model_local=True)
+    # # Step 3: Convert to ONNX format
+    # convert_torch_to_onnx_local(model, image_input, text_input, 
+    #                           output_path="./compile_and_profile/onnx", 
+    #                           test_onnx_model_local=True)
 
-    # Step 4: Compile and profile on AIHub
-    model = compile_and_profile_aihub(model_path="./compile_and_profile/onnx/model.onnx")
+    # # Step 4: Compile and profile on AIHub
+    # model = compile_and_profile_aihub(model_path="./compile_and_profile/onnx/model.onnx")
     
-    # Step 5: Run inference on AIHub
-    # Note: Model can be either:
-    # - Local path: './compile_and_profile/qnn/model.bin'
-    # - AIHub model: hub.get_job('job_id').get_target_model()
-    inference_aihub(model, image_input, text_input)
+    # # Step 5: Run inference on AIHub
+    # # Note: Model can be either:
+    # # - Local path: './compile_and_profile/qnn/model.bin'
+    # # - AIHub model: hub.get_job('job_id').get_target_model()
+    # inference_aihub(model, image_input, text_input)
     
 
 

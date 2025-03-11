@@ -4,6 +4,7 @@ import torch
 import pickle
 import subprocess
 
+from mpi4py import MPI
 import torch.distributed as dist
 
 
@@ -17,8 +18,8 @@ def apply_distributed(opt):
         master_address = None
         master_port = None
 
-    master_address = dist.broadcast(master_address, 0)
-    master_port = dist.broadcast(master_port, 0)
+    master_address = MPI.COMM_WORLD.bcast(master_address, root=0)
+    master_port = MPI.COMM_WORLD.bcast(master_port, root=0)
 
     if torch.distributed.is_available() and opt['world_size'] > 1:
         init_method_url = 'tcp://{}:{}'.format(master_address, master_port)
@@ -61,33 +62,51 @@ def init_distributed(opt):
     apply_distributed(opt)
     return opt
 
-def is_dist_avail_and_initialized():
-    if not dist.is_available():
-        return False
-    if not dist.is_initialized():
-        return False
-    return True
+def is_main_process():
+    rank = 0
+    if 'OMPI_COMM_WORLD_SIZE' in os.environ:
+        rank = int(os.environ['OMPI_COMM_WORLD_RANK'])
+
+    return rank == 0
 
 def get_world_size():
-    if not is_dist_avail_and_initialized():
+    if not dist.is_available():
+        return 1
+    if not dist.is_initialized():
         return 1
     return dist.get_world_size()
 
 def get_rank():
-    if not is_dist_avail_and_initialized():
+    if not dist.is_available():
+        return 0
+    if not dist.is_initialized():
         return 0
     return dist.get_rank()
 
-def is_main_process():
-    return get_rank() == 0
 
 def synchronize():
     """
-    Helper function to synchronize between processes when using distributed training
+    Helper function to synchronize (barrier) among all processes when
+    using distributed training
     """
-    if not is_dist_avail_and_initialized():
+    if not dist.is_available():
+        return
+    if not dist.is_initialized():
         return
     world_size = dist.get_world_size()
+    rank = dist.get_rank()
     if world_size == 1:
         return
-    dist.barrier()
+
+    def _send_and_wait(r):
+        if rank == r:
+            tensor = torch.tensor(0, device="cuda")
+        else:
+            tensor = torch.tensor(1, device="cuda")
+        dist.broadcast(tensor, r)
+        while tensor.item() == 1:
+            time.sleep(1)
+
+    _send_and_wait(0)
+    # now sync on the main process
+    _send_and_wait(1)

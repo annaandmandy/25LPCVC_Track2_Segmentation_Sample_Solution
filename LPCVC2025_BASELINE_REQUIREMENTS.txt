@@ -14,7 +14,6 @@ sentencepiece
 ftfy
 regex
 nltk
-# mpi4py # ==3.1.5 # difficult to install due to conflicts of versions 
 vision-datasets
 cython
 pycocotools

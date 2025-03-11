@@ -7,7 +7,9 @@
 - [2024.12.10] LPCVC 2025 announced at NeurIPS 2024
 
 ## 1. Model Training and Evaluation
-:point_right: ***Please refer to [[baseline_instruction]](BASELINE_README.md) and [[XDecoder]](https://github.com/microsoft/X-Decoder) for model training and evaluation details.***
+:point_right: ***Please refer to [[LPCVC2025_BASELINE_INSTRUCTION]](LPCVC2025_BASELINE_INSTRUCTION.md) for the baseline environment setup and training instructions. As well as some hints to obtain a better solution for the competition! 
+
+For more architectures and details, please refer to [[XDecoder]](https://github.com/microsoft/X-Decoder).***
 
 
 ## 2. Model Compilation and Profiling (Qualcomm AI Hub)

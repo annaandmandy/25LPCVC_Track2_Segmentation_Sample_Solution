@@ -189,15 +189,15 @@ class XDecoder(nn.Module):
         Post-process model outputs to generate final prediction mask.
         
         Args:
-            pred_gmasks: Predicted grounding masks
-            pred_gtexts: Predicted text embeddings
-            class_emb: Class embedding for matching
+            pred_gmasks: Predicted grounding masks, shape=bs x nqueries x h x w
+            pred_gtexts: Predicted text embeddings, shape=bs x nqueries x caption_dim(512)
+            class_emb: Class embedding for matching, shape=n_text_prompt x class_emb_dim(512)
             
         Returns:
             Final binary prediction mask
         """
-        pred_gmasks = pred_gmasks[0,self.num_queries:2*self.num_queries-1]
-        v_emb = pred_gtexts[0,self.num_queries:2*self.num_queries-1]
+        pred_gmasks = pred_gmasks
+        v_emb = pred_gtexts
         t_emb = class_emb
 
         t_emb = t_emb / (t_emb.norm(dim=-1, keepdim=True) + 1e-7)
@@ -206,21 +206,15 @@ class XDecoder(nn.Module):
         temperature = self.temperature
         out_prob = self.vl_similarity(v_emb, t_emb, temperature=temperature)
         
-        # matched_id = out_prob.max(1)[1] # choose the top-1 confident prediction
-        # mask_pred_results = pred_gmasks[:, matched_id,:,:] #torch.Size([1, 1, 64, 64])
-        matched_id = out_prob.max(0)[1] # choose the top-1 confident prediction
-        mask_pred_results = pred_gmasks[matched_id,:,:] #torch.Size([1, 1, 64, 64])
+        matched_id = out_prob.max(1)[1] # choose the top-1 confident prediction
+        mask_pred_results = pred_gmasks[:, matched_id,:,:] #torch.Size([1, 1, 64, 64])
 
         # upsampling to input image size, 1024
         image_shape = self.image_resolution # 1024
-        # mask_pred_results = F.interpolate(mask_pred_results, 
-        #                                   size=image_shape, mode="bilinear", align_corners=False, 
-        #                                   antialias=False)[0]
-        mask_pred_results = F.interpolate(mask_pred_results.unsqueeze(0), 
+        mask_pred_results = F.interpolate(mask_pred_results, 
                                           size=image_shape, mode="bilinear", align_corners=False, 
-                                          antialias=False)[0].squeeze(0)
-        
-        mask_pred_results = mask_pred_results >= 0
+                                          antialias=False)[0]
+        mask_pred_results = mask_pred_results.squeeze() >= 0
         return mask_pred_results.float() # bool variables are not supported by QNN as output features
 
 
@@ -247,8 +241,9 @@ class XDecoder(nn.Module):
         output = self.mask_decoder(multi_scale_features, mask_features, mask=None, target_queries=None, target_vlp=None, 
                                    task='grounding_eval', extra=extra)
         
-        # top1_mask_pred = self.post_processing(output['pred_masks'], output['pred_captions'], text_embeddings['class_emb'][0])
-        top1_mask_pred = self.post_processing(output['pred_masks'], output['pred_captions'], text_embeddings['class_emb'])
+        pred_gmasks = output['pred_masks'][:, self.num_queries:]
+        pred_gcaptions = output['pred_captions'][:, self.num_queries:]
+        top1_mask_pred = self.post_processing(pred_gmasks, pred_gcaptions, text_embeddings['class_emb'][0])
         return top1_mask_pred
 
 
