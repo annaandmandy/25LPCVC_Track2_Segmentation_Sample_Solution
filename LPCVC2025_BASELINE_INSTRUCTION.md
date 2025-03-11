@@ -170,7 +170,7 @@ Consider using QNN-supported alternatives (e.g., BatchNorm instead of GroupNorm)
   A: No, as DeformableAttention is not used in the baseline model.
 
 - **Q: MPI installation issues?**  
-  A: Use conda-forge channel for mpi4py installation instead of pip. Make sure you install `libopenmpi-dev`, and we noticed that using `conda install -c conda-forge mpi4py openmpi` is easier than using `pip` to install `mpi4py`. Please refer to the mpi4py official doc and the pip page (https://pypi.org/project/mpi4py/) and discussions on Reddit to look for similar 
+  A: Use conda-forge channel for mpi4py installation instead of pip. Make sure you install `libopenmpi-dev`, and we noticed that using `conda install -c conda-forge mpi4py` is easier than using `pip` to install `mpi4py`, and sometimes `openmpi` is also needed to install. Please refer to the mpi4py official doc and the pip page (https://pypi.org/project/mpi4py/) and discussions on Reddit to look for similar 
   questions.
 
 - **Q: Missing dataset files?**  
@@ -183,9 +183,12 @@ Consider using QNN-supported alternatives (e.g., BatchNorm instead of GroupNorm)
 
 -  **Q: Python packages installation errors?**  
   A: Errors we noticed:
-    - AttributeError: module 'onnx' has no attribute 'load_from_string' - [**Solution:** upgrade onnx, `pip install --upgrade onnx`]
-    - opencv: Could not load the Qt platform plugin "xcb" in "" even though it was found - [**Solution:** uninstall pyqt5, `pip uninstall PyQt5`, may need to re-install opencv-python]
-    - `mpi` related issues - [**Solution:** refer to pip mpi2py page and official docs]
+    - AttributeError: module 'onnx' has no attribute 'load_from_string' 
+      - [**Solution**] upgrade onnx, `pip install --upgrade onnx`
+    - opencv: Could not load the Qt platform plugin "xcb" in "" even though it was found 
+      - [**Solution**] uninstall pyqt5, `pip uninstall PyQt5`, may need to re-install opencv-python
+    - `mpi` related issues 
+      - [**Solution**] refer to pip mpi4py page and official docs
 
 
 ### Model Architecture
