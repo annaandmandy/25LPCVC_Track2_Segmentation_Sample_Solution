@@ -27,7 +27,8 @@ CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 python entry.py train \
             REF.TEST.BATCH_SIZE_TOTAL 2 \
             SOLVER.LR_MULTIPLIER.lang_encoder 0.1 \
             WEIGHT True \
-            RESUME_FROM /pth/to/xdecoder_data/pretrained/focalt_in21k_yfcc_gcc_xdecoder_unicl.pt
+            RESUME_FROM pretrained_weights/focalt_in21k_yfcc_gcc_xdecoder_unicl.pt
+
 
 # CUDA_VISIBLE_DEVICES=1 mpirun -n 1 python entry.py evaluate \
 #             --conf_files configs/xdecoder/focalt_unicl_lang_finetune.yaml \
@@ -48,4 +49,4 @@ CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 python entry.py train \
 #             ADE20K.TEST.BATCH_SIZE_TOTAL 1 \
 #             FP16 True \
 #             WEIGHT True \
-#             RESUME_FROM /pth/to/xdecoder_data/xdecoder/xdecoder_focalt_last.pt
+#             RESUME_FROM /pth/to/xdecoder_data/pretrained/focalt_in21k_yfcc_gcc_xdecoder_unicl.pt

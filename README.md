@@ -1,28 +1,17 @@
 # Sample Solution - Track 2: Open-Vocabulary Segmentation with Text-Prompt (LPCVC 2025)
 
 ## :fire: News
+- [2025.03.10] More detailed baseline instruction is provided!
 - [2025.02.13] OpenCV Webinar by Professor Lu introducing LPCVC 2025
 - [2025.02.01] Sample solution of Track2: X-Decoder released
 - [2025.01.10] LPCVC 2025 accepted as CVPR 2025 Workshop
 - [2024.12.10] LPCVC 2025 announced at NeurIPS 2024
 
 ## 1. Model Training and Evaluation
-:point_right: ***Please refer to [[XDecoder]](https://github.com/microsoft/X-Decoder) for model training and evaluation details.***
+:point_right: ***Please refer to [[LPCVC2025_BASELINE_INSTRUCTION]](LPCVC2025_BASELINE_INSTRUCTION.md) for the baseline environment setup and training instructions. As well as some hints to obtain a better solution for the competition!***
 
-### Model Details
-- Architecture: Focal-T / ViT-b
-- Training data: COCO
-- Evaluation data: RefCOCOg
-- Task: Grounding Segmentation
+For more architectures and details, please refer to [[XDecoder]](https://github.com/microsoft/X-Decoder).
 
-### Getting Started
-- Training command: `sh command.sh`
-- Pre-trained weights: [[Google Drive]](https://drive.google.com/file/d/1pk1HVDvQuGEyGwB4fP6y35mLWqY5xqOq/view?usp=drive_link)
-  - Download to: `./lpcvc_track2_models/model_state_dict.pt`
-
-### :bulb: Important Tips
-- Higher input resolution generally improves segmentation accuracy but increases computational cost. Consider this trade-off carefully.
-- Some complex operations (e.g., GroupNorm, DeformableAttention) may not be well optimized/supported by QNN libraries. Consider using alternative implementations. Check QNN documentation for supported operations.
 
 ## 2. Model Compilation and Profiling (Qualcomm AI Hub)
 For detailed instructions on model compilation, profiling and inference, refer to the [[AI Hub Documentation]](https://app.aihub.qualcomm.com/docs/).
