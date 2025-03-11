@@ -167,7 +167,7 @@ def compile_and_profile_aihub(model_path="./compile_and_profile/onnx/model.onnx"
     )
 
     # IMPORTANT! You must share your compile job to lpcvc organizers thus we can pull and evalaute it.
-    compile_job.modify_sharing(add_emails=['lowpowervision@gmail.com'])
+    # compile_job.modify_sharing(add_emails=['lowpowervision@gmail.com'])
     model = compile_job.get_target_model()
     
     # Download compiled model if requested
@@ -232,9 +232,10 @@ if __name__ == '__main__':
     text = "dog."
     image_input, text_input = prepare_data(image_path, text)
 
+    print("image finished...")
     # Step 2: Build model
     model = build_model(image_input, text_input, test_torch_model_local=True)
-
+    print("model finished...")
     # Step 3: Convert to ONNX format
     convert_torch_to_onnx_local(model, image_input, text_input, 
                               output_path="./compile_and_profile/onnx", 

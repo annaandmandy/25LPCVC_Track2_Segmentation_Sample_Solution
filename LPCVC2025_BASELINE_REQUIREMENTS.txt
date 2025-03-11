@@ -29,3 +29,5 @@ deepspeed
 wandb
 infinibatch
 gradio
+onnxruntime
+qai-hub

@@ -1,6 +1,7 @@
 # Sample Solution - Track 2: Open-Vocabulary Segmentation with Text-Prompt (LPCVC 2025)
 
 ## :fire: News
+- [2025.03.10] More detailed baseline instruction is provided!
 - [2025.02.13] OpenCV Webinar by Professor Lu introducing LPCVC 2025
 - [2025.02.01] Sample solution of Track2: X-Decoder released
 - [2025.01.10] LPCVC 2025 accepted as CVPR 2025 Workshop
