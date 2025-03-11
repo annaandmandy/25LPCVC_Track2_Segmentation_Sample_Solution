@@ -13,7 +13,7 @@ conda install pip
 # [Different from XDecoder env setup, NO Mask2Former needed as there is no deformableAttention in the baseline model.
 
 # Install required packages
-pip install -r ./LPCVC2025_BASELINE_REQUIREMENTS.txt
+pip install --upgrade -r ./LPCVC2025_BASELINE_REQUIREMENTS.txt
 
 # Install additional tools
 pip install git+https://github.com/facebookresearch/detectron2
@@ -22,7 +22,7 @@ pip install git+https://github.com/cocodataset/panopticapi.git # for coco datase
 
 # Install MPI for multi-processing training (refer to: https://pypi.org/project/mpi4py/)
 sudo apt-get install libopenmpi-dev
-conda install -c conda-forge mpi4py openmpi
+conda install -c conda-forge mpi4py # noticed pip install mpi4py errors, sometimes need to install openmpi together
 ```
 
 Setup Evaluation Tools
@@ -180,6 +180,13 @@ Consider using QNN-supported alternatives (e.g., BatchNorm instead of GroupNorm)
   XDecoder team put some pre-processed data files on their official Github repo (https://github.com/microsoft/X-Decoder/
   tree/v2.0) or HuggingFace repo (https://huggingface.co/xdecoder/X-Decoder/tree/main). If you find something is hard to 
   find on public sources, please go to check their Huggingface page and you probably will find them there.
+
+-  **Q: Python packages installation errors?**  
+  A: Errors we noticed:
+    - AttributeError: module 'onnx' has no attribute 'load_from_string' - [**Solution:** upgrade onnx, `pip install --upgrade onnx`]
+    - opencv: Could not load the Qt platform plugin "xcb" in "" even though it was found - [**Solution:** uninstall pyqt5, `pip uninstall PyQt5`, may need to re-install opencv-python]
+    - `mpi` related issues - [**Solution:** refer to pip mpi2py page and official docs]
+
 
 ### Model Architecture
 - **Q: How does the baseline differ from original X-Decoder?**  

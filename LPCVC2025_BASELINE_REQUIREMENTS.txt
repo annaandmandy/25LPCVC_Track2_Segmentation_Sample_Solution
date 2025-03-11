@@ -30,4 +30,5 @@ wandb
 infinibatch
 gradio
 onnxruntime
+onnx
 qai-hub
