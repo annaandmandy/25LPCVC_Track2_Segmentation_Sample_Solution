@@ -79,7 +79,7 @@ qnn_outputs = inference_job.download_output_data() # shape=[1024, 1024], numpy.a
 
 #### Input Format
 - **Image**:
-  - RGB format, shape: 3x1024x1024
+  - RGB format, shape: 1x3x1024x1024
   - Longest edge resized to 1024, padded to square
 - **Text**:
   - Shape: 2x1x77 (tokenized embedding + attention mask)
@@ -87,16 +87,26 @@ qnn_outputs = inference_job.download_output_data() # shape=[1024, 1024], numpy.a
 
 ```python
 # Image preprocessing example
-img = Image.open(image_path).convert("RGB")
-transform = transforms.Compose([
-    transforms.Resize(1000, max_size=1024),
-])
-image = transform(img)
-image = torch.from_numpy(np.asanyarray(image)).float().permute(2, 0, 1)
-images = [image]
-image_input = ImageList.from_tensors(images, size_divisibility=1024).tensor
+"""Loads an image, resizes it while maintaining aspect ratio, and pads it to 1024x1024."""
+    # Read the image
+    image = cv2.imread(img_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    h, w, _ = image.shape
+    # Resize the longest edge to 1024 while maintaining the aspect ratio
+    if h > w:
+        new_h = 1024
+        new_w = int((w / h) * new_h)
+    else:
+        new_w = 1024
+        new_h = int((h / w) * new_w)
+    image_resized = cv2.resize(image, (new_w, new_h))
+    pad_image = np.zeros((1024, 1024, 3), np.uint8) # Create a 1024x1024 canvas for padding
+    pad_image[:new_h, :new_w] = image_resized # Place the resized image on the canvas (top-left corner)
+    pad_image = pad_image.astype(np.float32)
+    pad_image = torch.as_tensor(np.ascontiguousarray(pad_image.transpose(2, 0, 1)))
+    image_input = torch.unsqueeze(pad_image, 0).detach().cpu().numpy() # shape: 1xcx1024x1024
 
-# All the input images have the same input shape 3x1024x1024 with RGB values [0, 255]. The original images are first resized to make the longest edge equals 1024, then padded to square 1024x1024 by 0s.
+# All the input images have the same input shape 1x3x1024x1024 with RGB values [0, 255]. The original images are first resized to make the longest edge equals 1024, then padded to square 1024x1024 by 0s.
 ```
 
 #### Text Processing
@@ -123,7 +133,7 @@ def compute_IoU(pred_seg, gd_seg):
     return I.sum() / (U.sum() + 1e-6)
 
 # Compute mIoU across test set
-pred = output['grounding_mask']  # Binary mask (threshold prediction.sigmoid() > 0.5)
+pred = output['grounding_mask']  # The output of model should already be binary mask (after threshold prediction.sigmoid() > 0.5)
 gt = input['groundings']['masks'].bool()
 IoUs = [compute_IoU(p, g) for p, g in zip(pred, gt)]
 mIoU = sum(IoUs) / len(IoUs) * 100
