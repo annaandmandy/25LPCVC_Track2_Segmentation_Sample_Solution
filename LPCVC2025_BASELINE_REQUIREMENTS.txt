@@ -1,4 +1,4 @@
-pillow
+pillow==9.4.0
 opencv-python
 pyyaml
 json_tricks
@@ -6,14 +6,14 @@ yacs
 scikit-learn
 pandas
 timm
-numpy
+numpy==1.24.3
 einops
 fvcore
 transformers
 sentencepiece
 ftfy
 regex
-nltk
+nltk==3.8.1
 vision-datasets
 cython
 pycocotools
@@ -21,7 +21,7 @@ diffdist
 pyarrow
 cityscapesscripts
 shapely
-scikit-image
+scikit-image==0.21.0
 mup
 accelerate
 kornia
