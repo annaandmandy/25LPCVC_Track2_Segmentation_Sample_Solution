@@ -940,7 +940,7 @@ class GeneralizedSEEM(nn.Module):
                 tokens = gtext['tokens']
                 
                 unique_hash_id = np.unique(grd_hash, return_index=True)[1]
-                selected_mask = np.zeros(len(grd_hash)).astype(np.bool)
+                selected_mask = np.zeros(len(grd_hash)).astype(bool)
                 selected_mask[unique_hash_id] = True
 
                 selected_token_emb = token_emb[selected_mask]

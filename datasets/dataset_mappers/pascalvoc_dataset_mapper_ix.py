@@ -159,11 +159,11 @@ class PascalVOCSegDatasetMapperIX:
 
         semseg_name = dataset_dict['semseg_name']
         semseg = self.encode_segmap(cv2.imread(semseg_name)[:,:,::-1])
-        class_names = [PASCAL_CLASSES[np.unique(semseg[instances_mask_byid[i].astype(np.bool)])[0].astype(np.int32)-1] for i in range(len(instances_mask_byid))]
+        class_names = [PASCAL_CLASSES[np.unique(semseg[instances_mask_byid[i].astype(bool)])[0].astype(np.int32)-1] for i in range(len(instances_mask_byid))]
 
         _,h,w = image.shape
         masks = BitMasks(torch.stack([torch.from_numpy(
-            cv2.resize(m.astype(np.float), (w,h), interpolation=cv2.INTER_CUBIC).astype(np.bool)
+            cv2.resize(m.astype(np.float), (w,h), interpolation=cv2.INTER_CUBIC).astype(bool)
             ) for m in instances_mask_byid]))
         instances = Instances(image.shape[-2:])
         instances.gt_masks = masks
