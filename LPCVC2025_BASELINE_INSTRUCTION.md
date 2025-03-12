@@ -13,23 +13,26 @@ conda install pip
 # [Different from XDecoder env setup, NO Mask2Former needed as there is no deformableAttention in the baseline model.
 
 # Install required packages
-pip install --upgrade -r ./LPCVC2025_BASELINE_REQUIREMENTS.txt
+pip install --upgrade -r ./LPCVC2025_BASELINE_REQUIREMENTS.txt # compared to original XDecoder requirements list, some libs are required older version, e.g., pillow==9.4.0, nltk==3.8.1, etc.
 
 # Install additional tools
-pip install git+https://github.com/facebookresearch/detectron2 # ensure the pytorch and cudatoolkit versions match, otherwise refer to (https://anaconda.org/nvidia/cuda-toolkit)
-pip install git+https://github.com/arogozhnikov/einops.git
+
+pip install git+https://github.com/MaureenZOU/detectron2-xyz.git # this is a modified version of detectron2 with some extra functions. 
+# pip install git+https://github.com/facebookresearch/detectron2 # If you prefer to use official detectron2 lib, some of the XDecoder dataloader operations need to be replaced, e.g., len(getattr(self, self.key_dataset)) in datasets/build.py
+
 pip install git+https://github.com/cocodataset/panopticapi.git # for coco dataset preparation
 
 # Install MPI for multi-processing training (refer to: https://pypi.org/project/mpi4py/)
-sudo apt-get install libopenmpi-dev
-conda install -c conda-forge mpi4py # noticed pip install mpi4py errors, sometimes need to install openmpi together
+# sudo apt-get install libopenmpi-dev # install this if you don't have MPI environment on your system
+
+conda install -c conda-forge mpi4py # noticed pip install mpi4py errors, then try conda install.
 ```
 
 Setup Evaluation Tools
 ```sh
 # captioning_evaluation tools (NOT needed for LPCVC text-promt segment task, but will cause XDecoder error if you don't have it.)
 # Download and setup captioning evaluation tools
-cd /PATH/TO/DATASET/ROOT
+cd /PATH/TO/PROJECT/ROOT
 mkdir .xdecoder_data && cd .xdecoder_data
 wget https://huggingface.co/xdecoder/X-Decoder/resolve/main/coco_caption.zip
 unzip coco_caption.zip
@@ -37,20 +40,21 @@ unzip coco_caption.zip
 
 ### Set Environment Variables
 ```sh
-# Replace /PATH/TO/DATASET/ROOT with your actual path
-export DETECTRON2_DATASETS=/PATH/TO/DATASET/ROOT/xdecoder_data
-export DATASET=/PATH/TO/DATASET/ROOT/xdecoder_data
-export DATASET2=/PATH/TO/DATASET/ROOT/xdecoder_data
-export VLDATASET=/PATH/TO/DATASET/ROOT/xdecoder_data
-export PATH=$PATH:/PATH/TO/DATASET/ROOT/xdecoder_data/coco_caption/jre1.8.0_321/bin
-export PYTHONPATH=$PYTHONPATH:/PATH/TO/DATASET/ROOT/xdecoder_data/coco_caption
+# Replace /PATH/TO/PROJECT/ROOT with your actual project path
+DTAROOT=/PATH/TO/PROJECT/ROOT/xdecoder_data
+export DETECTRON2_DATASETS=$DTAROOT
+export DATASET=$DTAROOT
+export DATASET2=$DTAROOT
+export VLDATASET=$DTAROOT
+export PATH=$PATH:$DTAROOT/coco_caption/jre1.8.0_321/bin
+export PYTHONPATH=$PYTHONPATH:$DTAROOT/coco_caption
 ```
 
 ## 2. Dataset Preparation
 
 ### Download and Extract COCO Dataset
 ```sh
-cd /PATH/TO/DATASET/ROOT/xdecoder_data
+cd /PATH/TO/PROJECT/ROOT/xdecoder_data
 mkdir coco && cd coco
 
 # Download COCO 2017 dataset
@@ -79,13 +83,16 @@ wget https://huggingface.co/xdecoder/X-Decoder/resolve/main/refcocog_umd_val.jso
 wget https://github.com/peteanderson80/coco-caption/blob/master/annotations/captions_val2014.json
 
 # Download LVIS annotations
+cd /PATH/TO/PROJECT/ROOT/xdecoder_data
+mkdir lvis && cd lvis
 wget https://huggingface.co/xdecoder/SEEM/resolve/main/coco_train2017_filtrefgumdval_lvis.json
 ```
 
 ### Prepare Semantic Annotations from Panoptic Annotations
 ```sh
+cd /PATH/TO/PROJECT/ROOT/xdecoder_data
 # ref: [OneFormer](https://github.com/SHI-Labs/OneFormer/blob/main/datasets/README.md)
-export DETECTRON2_DATASETS=/PATH/TO/DATASET/ROOT/xdecoder_data
+export DETECTRON2_DATASETS=/PATH/TO/PROJECT/ROOT/xdecoder_data
 python prepare_coco_semantic_annos_from_panoptic_annos.py
 ```
 
@@ -187,8 +194,9 @@ Consider using QNN-supported alternatives (e.g., BatchNorm instead of GroupNorm)
       - [**Solution**] upgrade onnx, `pip install --upgrade onnx`
     - opencv: Could not load the Qt platform plugin "xcb" in "" even though it was found 
       - [**Solution**] uninstall pyqt5, `pip uninstall PyQt5`, may need to re-install opencv-python
-    - `mpi` related issues 
-      - [**Solution**] refer to pip mpi4py page and official docs
+    - The provided dependency requirements list is different from XDecoder? 
+      - [**Answer**] Yes. Some libraries referred by XDecoder is out-dated and some operations are unsupported. Thus we figured out an alternative list, with most libs up-to-date, and some specific ones are installed the older version to match the operations in the code (e.g., pillow==9.4.0, nltk==3.8.1, etc.). Moreover, since XDecoder uses another modified Detectron2 lib, thus to use that one, these older version libs are required. If you prefer to use your own env or latest version of libs, some operations of the provided sample solution code base need to be replaced.
+    
 
 
 ### Model Architecture
