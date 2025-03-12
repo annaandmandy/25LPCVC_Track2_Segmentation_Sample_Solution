@@ -117,6 +117,7 @@ qnn_outputs = inference_job.download_output_data() # shape=[1024, 1024], numpy.a
 # Text tokenization
 tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch32')
 tokenizer.add_special_tokens({'cls_token': tokenizer.eos_token})
+text = text if text.endswith('.') else text + '.'
 tokens = tokenizer(text, padding='max_length', truncation=True, max_length=77, return_tensors='pt')
 text_input = torch.stack((tokens['input_ids'], tokens['attention_mask']))  # Shape: 2x1x77
 
