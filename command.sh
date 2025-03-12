@@ -2,6 +2,7 @@ CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 python entry.py train \
             --conf_files configs/xdecoder/focalt_unicl_lang_finetune.yaml \
             --overrides \
             FP16 True \
+            PORT 36874 \
             COCO.INPUT.IMAGE_SIZE 1024 \
             MODEL.DECODER.HIDDEN_DIM 512 \
             MODEL.ENCODER.CONVS_DIM 512 \
