@@ -16,7 +16,7 @@ conda install pip
 pip install --upgrade -r ./LPCVC2025_BASELINE_REQUIREMENTS.txt
 
 # Install additional tools
-pip install git+https://github.com/facebookresearch/detectron2
+pip install git+https://github.com/facebookresearch/detectron2 # ensure the pytorch and cudatoolkit versions match, otherwise refer to (https://anaconda.org/nvidia/cuda-toolkit)
 pip install git+https://github.com/arogozhnikov/einops.git
 pip install git+https://github.com/cocodataset/panopticapi.git # for coco dataset preparation
 
