@@ -32,8 +32,8 @@ Setup Evaluation Tools
 ```sh
 # captioning_evaluation tools (NOT needed for LPCVC text-promt segment task, but will cause XDecoder error if you don't have it.)
 # Download and setup captioning evaluation tools
-cd /PATH/TO/PROJECT/ROOT
-mkdir .xdecoder_data && cd .xdecoder_data
+cd /PATH/TO/PROJECT/ROOT # Replace /PATH/TO/PROJECT/ROOT with your actual project path
+mkdir /PATH/TO/PROJECT/ROOT/xdecoder_data && cd /PATH/TO/PROJECT/ROOT/xdecoder_data
 wget https://huggingface.co/xdecoder/X-Decoder/resolve/main/coco_caption.zip
 unzip coco_caption.zip
 ```
