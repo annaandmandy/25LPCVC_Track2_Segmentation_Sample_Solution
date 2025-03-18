@@ -1,33 +1,22 @@
 # Sample Solution - Track 2: Open-Vocabulary Segmentation with Text-Prompt (LPCVC 2025)
 
 ## :fire: News
+- [2025.03.10] More detailed baseline instruction is provided!
 - [2025.02.13] OpenCV Webinar by Professor Lu introducing LPCVC 2025
 - [2025.02.01] Sample solution of Track2: X-Decoder released
 - [2025.01.10] LPCVC 2025 accepted as CVPR 2025 Workshop
 - [2024.12.10] LPCVC 2025 announced at NeurIPS 2024
 
 ## 1. Model Training and Evaluation
-:point_right: ***Please refer to [[XDecoder]](https://github.com/microsoft/X-Decoder) for model training and evaluation details.***
+:point_right: ***Please refer to [[LPCVC2025_BASELINE_INSTRUCTION]](LPCVC2025_BASELINE_INSTRUCTION.md) for the baseline environment setup and training instructions. As well as some hints to obtain a better solution for the competition!***
 
-### Model Details
-- Architecture: Focal-T / ViT-b
-- Training data: COCO
-- Evaluation data: RefCOCOg
-- Task: Grounding Segmentation
+For more architectures and details, please refer to [[XDecoder]](https://github.com/microsoft/X-Decoder).
 
-### Getting Started
-- Training command: `sh command.sh`
-- Pre-trained weights: [[Google Drive]](https://drive.google.com/file/d/1pk1HVDvQuGEyGwB4fP6y35mLWqY5xqOq/view?usp=drive_link)
-  - Download to: `./lpcvc_track2_models/model_state_dict.pt`
-
-### :bulb: Important Tips
-- Higher input resolution generally improves segmentation accuracy but increases computational cost. Consider this trade-off carefully.
-- Some complex operations (e.g., GroupNorm, DeformableAttention) may not be well optimized/supported by QNN libraries. Consider using alternative implementations. Check QNN documentation for supported operations.
 
 ## 2. Model Compilation and Profiling (Qualcomm AI Hub)
 For detailed instructions on model compilation, profiling and inference, refer to the [[AI Hub Documentation]](https://app.aihub.qualcomm.com/docs/).
 
-:point_right: ***LPCVC 2025 Track 2, Sample solution compilation, profiling and inference pipeline available in [[compile_profile_inference_aihub.py]](./compile_and_profile/compile_profile_inference_aihub.py)***
+:point_right: ***LPCVC 2025 Track 2, Sample solution compilation, profiling and inference pipeline available in [[compile_profile_inference_aihub]](./compile_and_profile)***. Run `python ./compile_and_profile/compile_profile_inference_aihub.py` to get your torch model inference, converting to onnx format, andn QNN model **compiling + profiling + inference** on AIHub all together.
 
 ```python
 # Submit compilation job to AIHub
@@ -51,7 +40,7 @@ profile_job = hub.submit_profile_job(
 
 ## 3. Inference and Evaluation
 
-:point_right: ***See [[compile_profile_inference_aihub.py]](./compile_and_profile/compile_profile_inference_aihub.py) for complete inference and evaluation pipeline.***
+:point_right: ***See [[compile_profile_inference_aihub]](./compile_and_profile) for complete inference and evaluation pipeline.***
 
 #### :warning: Important Note
 During evaluation, only the following inference commands will be used. Ensure your submitted model is correctly compiled and produces valid outputs on AIHub:
@@ -90,7 +79,7 @@ qnn_outputs = inference_job.download_output_data() # shape=[1024, 1024], numpy.a
 
 #### Input Format
 - **Image**:
-  - RGB format, shape: 3x1024x1024
+  - RGB format, shape: 1x3x1024x1024
   - Longest edge resized to 1024, padded to square
 - **Text**:
   - Shape: 2x1x77 (tokenized embedding + attention mask)
@@ -98,26 +87,37 @@ qnn_outputs = inference_job.download_output_data() # shape=[1024, 1024], numpy.a
 
 ```python
 # Image preprocessing example
-img = Image.open(image_path).convert("RGB")
-transform = transforms.Compose([
-    transforms.Resize(1000, max_size=1024),
-])
-image = transform(img)
-image = torch.from_numpy(np.asanyarray(image)).float().permute(2, 0, 1)
-images = [image]
-image_input = ImageList.from_tensors(images, size_divisibility=1024).tensor
+"""Loads an image, resizes it while maintaining aspect ratio, and pads it to 1024x1024."""
+    # Read the image
+    image = cv2.imread(img_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    h, w, _ = image.shape
+    # Resize the longest edge to 1024 while maintaining the aspect ratio
+    if h > w:
+        new_h = 1024
+        new_w = int((w / h) * new_h)
+    else:
+        new_w = 1024
+        new_h = int((h / w) * new_w)
+    image_resized = cv2.resize(image, (new_w, new_h))
+    pad_image = np.zeros((1024, 1024, 3), np.uint8) # Create a 1024x1024 canvas for padding
+    pad_image[:new_h, :new_w] = image_resized # Place the resized image on the canvas (top-left corner)
+    pad_image = pad_image.astype(np.float32)
+    pad_image = torch.as_tensor(np.ascontiguousarray(pad_image.transpose(2, 0, 1)))
+    image_input = torch.unsqueeze(pad_image, 0).detach().cpu().numpy() # shape: 1xcx1024x1024
 
-# All the input images have the same input shape 3x1024x1024 with RGB values [0, 255]. The original images are first resized to make the longest edge equals 1024, then padded to square 1024x1024 by 0s.
+# All the input images have the same input shape 1x3x1024x1024 with RGB values [0, 255]. The original images are first resized to make the longest edge equals 1024, then padded to square 1024x1024 by 0s.
 ```
 
 #### Text Processing
 - Uses OpenAI CLIP tokenizer
-- Format: `[text_embedding; attention_mask]`
+- Format: `[input_ids; attention_mask]`
 
 ```python
 # Text tokenization
 tokenizer = CLIPTokenizer.from_pretrained('openai/clip-vit-base-patch32')
 tokenizer.add_special_tokens({'cls_token': tokenizer.eos_token})
+text = text if text.endswith('.') else text + '.'
 tokens = tokenizer(text, padding='max_length', truncation=True, max_length=77, return_tensors='pt')
 text_input = torch.stack((tokens['input_ids'], tokens['attention_mask']))  # Shape: 2x1x77
 
@@ -134,7 +134,7 @@ def compute_IoU(pred_seg, gd_seg):
     return I.sum() / (U.sum() + 1e-6)
 
 # Compute mIoU across test set
-pred = output['grounding_mask']  # Binary mask (threshold prediction.sigmoid() > 0.5)
+pred = output['grounding_mask']  # The output of model should already be binary mask (after threshold prediction.sigmoid() > 0.5)
 gt = input['groundings']['masks'].bool()
 IoUs = [compute_IoU(p, g) for p, g in zip(pred, gt)]
 mIoU = sum(IoUs) / len(IoUs) * 100

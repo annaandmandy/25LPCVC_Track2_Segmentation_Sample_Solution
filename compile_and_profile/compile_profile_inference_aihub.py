@@ -69,23 +69,30 @@ def prepare_data(image_path, text):
             - text_input: Integer tensor of shape (2,1,77)
     """
     # Load and preprocess image
-    img = Image.open(image_path).convert("RGB")
-    width_ori, height_ori = img.size[0], img.size[1]
-    transform = transforms.Compose([
-        transforms.Resize(1000, max_size=1024),  # Resize longest edge to 1024
-    ])
-    image = transform(img)
-
-    image = torch.from_numpy(np.asanyarray(image)).float().permute(2, 0, 1).to(device)
-    image_size_resized = image.shape
-    size_divisibility = 1024  # Resize and pad all images to 1024x1024
-    images = [image]
-    image_input = ImageList.from_tensors(images, size_divisibility).tensor.to(device)
+    image = cv2.imread(image_path)
+    # Convert color format to RGB
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # Get the dimensions of the image
+    h, w, _ = image.shape
+    # Resize the longest edge to 1024 while maintaining the aspect ratio
+    if h > w:
+        new_h = 1024
+        new_w = int((w / h) * new_h)
+    else:
+        new_w = 1024
+        new_h = int((h / w) * new_w)
+    image_resized = cv2.resize(image, (new_w, new_h))
+    pad_image = np.zeros((1024, 1024, 3), np.uint8) # Create a 1024x1024 canvas for padding
+    pad_image[:new_h, :new_w] = image_resized # Place the resized image on the canvas (top-left corner)
+    pad_image = pad_image.astype(np.float32)
+    pad_image = torch.as_tensor(np.ascontiguousarray(pad_image.transpose(2, 0, 1))) # Convert the padded image to torch tensor
+    image_input = torch.unsqueeze(pad_image, 0).to(device)  # Add batch dimension
 
     # Tokenize text input
     pretrained_tokenizer = 'openai/clip-vit-base-patch32'
     tokenizer = CLIPTokenizer.from_pretrained(pretrained_tokenizer)
     tokenizer.add_special_tokens({'cls_token': tokenizer.eos_token})
+    text = text if text.endswith('.') else text + '.'
     tokens = tokenizer(text, padding='max_length', truncation=True, max_length=77, return_tensors='pt')
     text_emb = tokens['input_ids'].type(torch.IntTensor).to(device)
     attention_mask = tokens['attention_mask'].type(torch.IntTensor).to(device)
@@ -232,9 +239,10 @@ if __name__ == '__main__':
     text = "dog."
     image_input, text_input = prepare_data(image_path, text)
 
+    print("image finished...")
     # Step 2: Build model
-    model = build_model(image_input, text_input)
-
+    model = build_model(image_input, text_input, test_torch_model_local=True)
+    print("model finished...")
     # Step 3: Convert to ONNX format
     convert_torch_to_onnx_local(model, image_input, text_input, 
                               output_path="./compile_and_profile/onnx", 

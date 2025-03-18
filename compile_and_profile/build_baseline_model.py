@@ -143,7 +143,8 @@ class XDecoder(nn.Module):
 
         self.image_resolution = 1024
         self.temperature = lang_encoder.logit_scale
-
+        self.num_queries = 101
+        
         # NOTE: if try to apply normalization to the input image, have to ensure (mean & std) are repeated to the same size, otherwise QNN would output errors.
         self.pixel_mean = torch.tensor(self.opt['INPUT']['PIXEL_MEAN']).view(1, -1, 1, 1).repeat(1, 1, self.image_resolution, self.image_resolution).to(device)
         self.pixel_std = torch.tensor(self.opt['INPUT']['PIXEL_STD']).view(1, -1, 1, 1).repeat(1, 1, self.image_resolution, self.image_resolution).to(device)
@@ -188,9 +189,9 @@ class XDecoder(nn.Module):
         Post-process model outputs to generate final prediction mask.
         
         Args:
-            pred_gmasks: Predicted grounding masks
-            pred_gtexts: Predicted text embeddings
-            class_emb: Class embedding for matching
+            pred_gmasks: Predicted grounding masks, shape=bs x nqueries x h x w
+            pred_gtexts: Predicted text embeddings, shape=bs x nqueries x caption_dim(512)
+            class_emb: Class embedding for matching, shape=n_text_prompt x class_emb_dim(512)
             
         Returns:
             Final binary prediction mask
@@ -240,7 +241,9 @@ class XDecoder(nn.Module):
         output = self.mask_decoder(multi_scale_features, mask_features, mask=None, target_queries=None, target_vlp=None, 
                                    task='grounding_eval', extra=extra)
         
-        top1_mask_pred = self.post_processing(output['pred_masks'], output['pred_captions'], text_embeddings['class_emb'][0])
+        pred_gmasks = output['pred_masks'][:, self.num_queries:]
+        pred_gcaptions = output['pred_captions'][:, self.num_queries:]
+        top1_mask_pred = self.post_processing(pred_gmasks, pred_gcaptions, text_embeddings['class_emb'][0])
         return top1_mask_pred
 
 

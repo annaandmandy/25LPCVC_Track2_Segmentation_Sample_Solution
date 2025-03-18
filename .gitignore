@@ -111,6 +111,8 @@ amlt/*
 data/*
 *.bin
 *.onnx
-*.txt
 
-lpcvc_env
+xdecoder_data/coco
+xdecoder_data/coco_caption
+xdecoder_data/*.zip
+xdecoder_data/lvis
