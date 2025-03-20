@@ -59,5 +59,5 @@ def register_all_imagenet(root):
         MetadataCatalog.get(name).evaluator_type = "classification"
 
 
-_root = os.getenv("DATASET", "/home/annaandmandy/ds542/LPCV/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data")
+_root = os.getenv("DATASET", "/projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data")
 register_all_imagenet(_root)

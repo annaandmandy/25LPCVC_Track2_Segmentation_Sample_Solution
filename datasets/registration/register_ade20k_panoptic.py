@@ -386,5 +386,5 @@ def register_all_ade20k_panoptic(root):
         )
 
 
-_root = os.getenv("DETECTRON2_DATASETS", "/home/annaandmandy/ds542/LPCV/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data")
+_root = os.getenv("DETECTRON2_DATASETS", "/projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data")
 register_all_ade20k_panoptic(_root)

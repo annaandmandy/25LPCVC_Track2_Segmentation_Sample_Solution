@@ -126,6 +126,6 @@ def register_all_pretrain(root):
 
 
 # _root = os.getenv("VLDATASET", "datasets") #may need a different root name?
-_root = os.getenv("DATASET2", "/home/annaandmandy/ds542/LPCV/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data") #may need a different root name?
-_coco_root = os.getenv("DATASET", "/home/annaandmandy/ds542/LPCV/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data") #may need a different root name?
+_root = os.getenv("DATASET2", "/projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data") #may need a different root name?
+_coco_root = os.getenv("DATASET", "/projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data") #may need a different root name?
 register_all_pretrain(_root)
