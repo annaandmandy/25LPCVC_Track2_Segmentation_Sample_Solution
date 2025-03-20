@@ -10,6 +10,8 @@ import os
 import json
 import logging
 import itertools
+import sys
+sys.path.append('/home/annaandmandy/ds542/LPCV/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data/coco_caption')
 
 import detectron2.utils.comm as comm
 from detectron2.evaluation.evaluator import DatasetEvaluator

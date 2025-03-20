@@ -184,7 +184,7 @@ def register_all_coco_panoptic_annos_caption_sem_seg(root):
         prefix_instances = prefix[: -len("_panoptic")]
         instances_meta = MetadataCatalog.get(prefix_instances)
         image_root, instances_json = instances_meta.image_root, instances_meta.json_file
-        # image_root = image_root.replace('datasets', root)
+        image_root = image_root.replace('datasets', root)
 
         register_coco_panoptic_annos_caption_sem_seg(
             prefix,
@@ -199,5 +199,5 @@ def register_all_coco_panoptic_annos_caption_sem_seg(root):
         )
 
 
-_root = os.getenv("DATASET", "datasets")
+_root = os.getenv("DATASET", "/home/annaandmandy/ds542/LPCV/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data")
 register_all_coco_panoptic_annos_caption_sem_seg(_root)

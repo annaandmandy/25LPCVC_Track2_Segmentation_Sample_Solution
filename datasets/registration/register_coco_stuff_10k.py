@@ -219,5 +219,5 @@ def register_all_coco_stuff_10k(root):
         )
 
 
-_root = os.getenv("DETECTRON2_DATASETS", "datasets")
+_root = os.getenv("DETECTRON2_DATASETS", "/home/annaandmandy/ds542/LPCV/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data")
 register_all_coco_stuff_10k(_root)
