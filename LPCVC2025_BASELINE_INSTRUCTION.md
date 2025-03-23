@@ -32,7 +32,7 @@ Setup Evaluation Tools
 ```sh
 # captioning_evaluation tools (NOT needed for LPCVC text-promt segment task, but will cause XDecoder error if you don't have it.)
 # Download and setup captioning evaluation tools, Replace /PATH/TO/PROJECT/ROOT with your actual project path
-mkdir /PATH/TO/PROJECT/ROOT/xdecoder_data && cd /PATH/TO/PROJECT/ROOT/xdecoder_data
+mkdir /projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data && cd /projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data
 wget https://huggingface.co/xdecoder/X-Decoder/resolve/main/coco_caption.zip
 unzip coco_caption.zip
 ```
@@ -40,7 +40,7 @@ unzip coco_caption.zip
 ### Set Environment Variables
 ```sh
 # Replace /PATH/TO/PROJECT/ROOT with your actual project path
-DTAROOT=/PATH/TO/PROJECT/ROOT/xdecoder_data
+DTAROOT=/projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data
 export DETECTRON2_DATASETS=$DTAROOT
 export DATASET=$DTAROOT
 export DATASET2=$DTAROOT
@@ -53,7 +53,7 @@ export PYTHONPATH=$PYTHONPATH:$DTAROOT/coco_caption
 
 ### Download and Extract COCO Dataset
 ```sh
-cd /PATH/TO/PROJECT/ROOT/xdecoder_data
+cd /projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data
 mkdir coco && cd coco
 
 # Download COCO 2017 dataset
@@ -89,9 +89,9 @@ wget https://huggingface.co/xdecoder/SEEM/resolve/main/coco_train2017_filtrefgum
 
 ### Prepare Semantic Annotations from Panoptic Annotations
 ```sh
-cd /PATH/TO/PROJECT/ROOT/xdecoder_data
+cd /projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data
 # ref: [OneFormer](https://github.com/SHI-Labs/OneFormer/blob/main/datasets/README.md)
-export DETECTRON2_DATASETS=/PATH/TO/PROJECT/ROOT/xdecoder_data
+export DETECTRON2_DATASETS=export DETECTRON2_DATASETS=/projectnb/dl4ds/projects/LPCV_track2_awz/ 25LPCVC_Track2_Segmentation_Sample_Solution/xdecoder_data
 python prepare_coco_semantic_annos_from_panoptic_annos.py
 ```
 

@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=0 mpirun -n 1 python entry.py train \
+CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 python entry.py train \
             --conf_files configs/xdecoder/focalt_unicl_lang_finetune.yaml \
             --overrides \
             FP16 True \
