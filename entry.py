@@ -27,10 +27,10 @@ def init_wandb(args, job_dir, entity='lpcvc', project='xdecoder', job_name='tmp'
     if os.path.exists(f"{wandb_dir}/runid.txt"):
         runid = open(f"{wandb_dir}/runid.txt").read()
 
-    wandb.init(project=project,
+    wandb.init(project='LPCVC_PROJECT',
             name=job_name,
             dir=wandb_dir,
-            entity=entity,
+            entity="huanghy1004-boston-university",
             resume="allow",
             id=runid,
             config={"hierarchical": True},)

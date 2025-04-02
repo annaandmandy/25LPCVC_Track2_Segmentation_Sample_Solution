@@ -19,7 +19,7 @@ RESUME_FROM: ''
 EVAL_AT_START: False
 
 # Logging and Debug
-WANDB: False
+WANDB: True
 LOG_EVERY: 100
 FIND_UNUSED_PARAMETERS: false
 
@@ -265,7 +265,7 @@ SOLVER:
     NORM_TYPE: 2.0
   AMP:
     ENABLED: True
-  MAX_NUM_EPOCHS: 50
+  MAX_NUM_EPOCHS: 5
 
 # Evaluation Dataset
 ADE20K:
