@@ -1,0 +1,137 @@
+# --------------------------------------------------------
+# X-Decoder -- Generalized Decoding for Pixel, Image, and Language
+# Copyright (c) 2022 Microsoft
+# Licensed under The MIT License [see LICENSE for details]
+# Written by Xueyan Zou (xueyan@cs.wisc.edu)
+# --------------------------------------------------------
+
+# Define Test/Trainer/Saving
+PIPELINE: XDecoderPipeline
+TRAINER: xdecoder
+SAVE_DIR: './data/output/mobilevit_test'
+base_path: "./"
+
+# Resume Logistic
+RESUME: false
+WEIGHT: false
+RESET_DATA_LOADER: false
+RESUME_FROM: ''
+EVAL_AT_START: False
+
+# Logging and Debug
+WANDB: True
+LOG_EVERY: 100
+FIND_UNUSED_PARAMETERS: false
+
+# Speed up training
+FP16: false
+PORT: '36873'
+
+# misc
+LOADER:
+  JOINT: True
+  KEY_DATASET: 'coco'
+
+##################
+# Task settings
+##################
+VERBOSE: true
+MODEL:
+  NAME: xdecoder_model
+  HEAD: xdecoder_head
+  MASK_ON: false
+  KEYPOINT_ON: false
+  LOAD_PROPOSALS: false
+  DIM_PROJ: 512
+  BACKBONE_DIM: 768
+  TEXT:
+    ARCH: vlpencoder
+    NAME: transformer
+    TOKENIZER: clip
+    CONTEXT_LENGTH: 77
+    WIDTH: 512
+    HEADS: 8
+    LAYERS: 12
+    AUTOGRESSIVE: True
+  BACKBONE:
+    NAME: MobileViT  # <-- Switched to MobileViT
+    PRETRAINED: ''
+    LOAD_PRETRAINED: false
+  ENCODER:
+    NAME: transformer_encoder_fpn
+    IGNORE_VALUE: 255
+    NUM_CLASSES: 133
+    LOSS_WEIGHT: 1.0
+    CONVS_DIM: 512
+    MASK_DIM: 512
+    NORM: "GN"
+    IN_FEATURES: ["0", "1", "2", "3"]
+    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: ["1", "2", "3"]
+    COMMON_STRIDE: 4
+    TRANSFORMER_ENC_LAYERS: 6
+  DECODER:
+    NAME: xdecoder
+    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
+    MASK: True
+    GROUNDING:
+      ENABLED: True
+      MAX_LEN: 5
+      TEXT_WEIGHT: 2.0
+      CLASS_WEIGHT: 0.5
+    DETECTION: False
+    CAPTION:
+      ENABLED: True
+      PHRASE_PROB: 0.0
+      SIM_THRES: 0.95
+    CAPTIONING:
+      ENABLED: True
+      STEP: 50
+    RETRIEVAL:
+      ENABLED: True
+      DIM_IMG: 768
+      ENSEMBLE: True
+    DEEP_SUPERVISION: True
+    NO_OBJECT_WEIGHT: 0.1
+    CAPTION_WEIGHT: 1.0
+    CAPTIONING_WEIGHT: 2.0
+    RETRIEVAL_WEIGHT: 2.0
+    BACKBONER_WEIGHT: 8.0
+    GCLASS_WEIGHT: 0.4
+    GMASK_WEIGHT: 1.0
+    GDICE_WEIGHT: 1.0
+    OCLASS_WEIGHT: 0.4
+    OMASK_WEIGHT: 1.0 
+    ODICE_WEIGHT: 1.0
+    CLASS_WEIGHT: 2.0
+    MASK_WEIGHT: 5.0
+    DICE_WEIGHT: 5.0
+    BBOX_WEIGHT: 5.0
+    GIOU_WEIGHT: 2.0
+    HIDDEN_DIM: 512
+    NUM_OBJECT_QUERIES: 101
+    NHEADS: 8
+    DROPOUT: 0.0
+    DIM_FEEDFORWARD: 2048
+    PRE_NORM: False
+    ENFORCE_INPUT_PROJ: False
+    SIZE_DIVISIBILITY: 32
+    TRAIN_NUM_POINTS: 12544
+    OVERSAMPLE_RATIO: 3.0
+    IMPORTANCE_SAMPLE_RATIO: 0.75
+    DEC_LAYERS: 10
+    TOP_GROUNDING_LAYERS: 3
+    TOP_CAPTION_LAYERS: 3
+    TOP_CAPTIONING_LAYERS: 3
+    TOP_RETRIEVAL_LAYERS: 3
+    TEST:
+      SEMANTIC_ON: True
+      INSTANCE_ON: True
+      PANOPTIC_ON: True
+      OVERLAP_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0.8
+      SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE: false
+
+# Remaining settings (COCO, VLP, SOLVER, etc.) can remain unchanged or be copied from the original config
+# depending on your training/evaluation focus.
+
+# You can copy COCO, VLP, SOLVER, and DATASETS settings from the original config to extend this one if needed.

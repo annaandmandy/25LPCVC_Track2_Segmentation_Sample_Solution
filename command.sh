@@ -4,6 +4,7 @@ conda activate xdecoder
 # Set LD_LIBRARY_PATH
 export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 export WANDB_KEY="a9007bbf2af8533987785004be9fae23e52af2f5"
+export QUALCOMM_AI_HUB_KEY="44165a068eebd71635bbb8e9198756c50e392b02"
 
 # CUDA_VISIBLE_DEVICES=0 mpirun -n 1 python entry.py train \
 #             --conf_files configs/xdecoder/focalt_unicl_lang_finetune.yaml \
@@ -38,7 +39,7 @@ export WANDB_KEY="a9007bbf2af8533987785004be9fae23e52af2f5"
 #             RESUME_FROM xdecoder_data/pretrained_weights/focalt_in21k_yfcc_gcc_xdecoder_unicl.pt
 
 
-# CUDA_VISIBLE_DEVICES=0 mpirun -n 1 python entry.py evaluate \
+# python entry.py evaluate \
 #             --conf_files configs/xdecoder/focalt_unicl_lang_finetune.yaml \
 #             --overrides \
 #             COCO.INPUT.IMAGE_SIZE 1024 \
@@ -59,7 +60,7 @@ export WANDB_KEY="a9007bbf2af8533987785004be9fae23e52af2f5"
 #             WEIGHT True \
 #             RESUME_FROM /pth/to/xdecoder_data/pretrained/focalt_in21k_yfcc_gcc_xdecoder_unicl.pt
 
-
+# works with baseline model and FFN layer replacement
 python entry.py train \
     --conf_files configs/xdecoder/focalt_unicl_lang_finetune.yaml \
     --overrides \

@@ -149,10 +149,9 @@ class FFNLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.linear2 = nn.Linear(dim_feedforward, d_model)
 
-
-        self.norm = DyT(d_model)  # 🔁 Replaced nn.LayerNorm with DyT
-
-
+        self.norm = nn.LayerNorm(d_model)
+        # self.norm = DyT(d_model)  # Replaced nn.LayerNorm with DyT
+        
         self.activation = _get_activation_fn(activation)
         self.normalize_before = normalize_before
 

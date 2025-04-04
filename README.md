@@ -66,7 +66,7 @@ qnn_outputs = inference_job.download_output_data() # shape=[1024, 1024], numpy.a
 
 #### Device
 - Snapdragon X Elite CRD
-
+dfdfd
 #### Test Dataset
 - 1000 images from ~200 categories
 - 3-5 annotated masks per image
