@@ -12,7 +12,7 @@ from timm.models.layers import trunc_normal_, DropPath, to_2tuple
 
 from detectron2.utils.file_io import PathManager
 from detectron2.modeling import BACKBONE_REGISTRY, Backbone, ShapeSpec
-from .registry import register_backbone
+from .build import register_backbone
 
 class ConvBNAct(nn.Module):
     def __init__(self, in_chs, out_chs, kernel_size=3, stride=1, act_layer=nn.SiLU):
@@ -31,12 +31,16 @@ class MobileViTBlock(nn.Module):
             nn.Conv2d(dim, dim, kernel_size, padding=kernel_size//2, groups=dim),
             nn.Conv2d(dim, dim, 1)
         )
+
+        self.patch_size = patch_size
+        ph, pw = patch_size
+        self.d_model = dim * ph * pw  # Calculate the correct embedding dimension
+
         self.transformer = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(d_model=dim, nhead=4, dim_feedforward=dim*2, batch_first=True),
             num_layers=depth
         )
         self.fusion = nn.Conv2d(dim * 2, dim, 1)
-        self.patch_size = patch_size
 
     def unfold(self, x):
         B, C, H, W = x.shape
@@ -46,7 +50,7 @@ class MobileViTBlock(nn.Module):
         x_patches = x.unfold(2, ph, ph).unfold(3, pw, pw)
         x_patches = x_patches.contiguous().view(B, C, -1, ph, pw).permute(0, 2, 1, 3, 4)
         x_patches = x_patches.flatten(3)
-        return x_patches.view(B, -1, C * ph * pw)
+        return x_patches.reshape(B, -1, C * ph * pw)
 
     def forward(self, x):
         y = self.local_rep(x)
@@ -122,12 +126,5 @@ class D2MobileViT(MobileViT, Backbone):
 @register_backbone
 def get_mobilevit_backbone(cfg):
     model = D2MobileViT(cfg['MODEL'], input_shape=None)
-
-    if cfg['MODEL']['BACKBONE'].get('LOAD_PRETRAINED', False):
-        filename = cfg['MODEL']['BACKBONE']['PRETRAINED']
-        print(f"=> loading pretrained weights from {filename}")
-        with PathManager.open(filename, "rb") as f:
-            ckpt = torch.load(f, map_location="cpu")['model']
-        model.load_state_dict(ckpt, strict=False)
 
     return model

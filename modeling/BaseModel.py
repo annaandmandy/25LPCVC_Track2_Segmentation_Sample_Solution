@@ -23,6 +23,8 @@ class BaseModel(nn.Module):
         torch.save(self.model.state_dict(), os.path.join(save_dir, "model_state_dict.pt"))
 
     def from_pretrained(self, load_dir):
+        if load_dir == 'None':
+            return self
         state_dict = torch.load(load_dir, map_location=self.opt['device'])
         state_dict = align_and_update_state_dicts(self.model.state_dict(), state_dict)
         self.model.load_state_dict(state_dict, strict=False)

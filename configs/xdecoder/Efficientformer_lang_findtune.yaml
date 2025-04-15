@@ -54,9 +54,18 @@ MODEL:
     LAYERS: 12
     AUTOGRESSIVE: True
   BACKBONE:
-    NAME: MobileViT  # <-- Switched to MobileViT
-    PRETRAINED: ''
-    LOAD_PRETRAINED: false
+    NAME: efficientformer_l1 # Specify EfficientFormer as the backbone
+    VARIANT: l1            # Choose the variant (e.g., l1, l3, l7)
+    PRETRAINED: FALSE    # Use pretrained weights
+    LOAD_PRETRAINED: true  # Load pretrained weights
+    EFFICIENTFORMER:
+      IMG_SIZE: 224        # Input image size
+      PATCH_SIZE: 2        # Patch size for transformer blocks
+      EMBED_DIM: 96        # Embedding dimension
+      DEPTHS: [2, 4, 3]    # Depth of transformer blocks
+      NUM_HEADS: [2, 4, 6] # Number of attention heads
+      FFN_EXPANSION: 4     # Feed-forward network expansion ratio
+      DROPOUT: 0.1         # Dropout rate
   ENCODER:
     NAME: transformer_encoder_fpn
     IGNORE_VALUE: 255

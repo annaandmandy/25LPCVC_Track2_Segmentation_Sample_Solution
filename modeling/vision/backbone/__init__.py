@@ -4,7 +4,8 @@ from .davit import *
 from .vit import *
 from .backbone import *
 from .build import *
-
+from .MobileViT import *
+from .efficientformer import *
 
 def build_backbone(config, **kwargs):
     model_name = config['MODEL']['BACKBONE']['NAME']
@@ -12,3 +13,4 @@ def build_backbone(config, **kwargs):
         raise ValueError(f'Unkown model: {model_name}')
 
     return model_entrypoints(model_name)(config, **kwargs)
+

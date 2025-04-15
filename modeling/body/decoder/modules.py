@@ -3,6 +3,7 @@ from typing import Optional
 import torch
 from torch import nn, Tensor
 from torch.nn import functional as F
+from torch.nn.functional import tanh
 
 from timm.models.layers import trunc_normal_
 from detectron2.layers import Conv2d
@@ -129,16 +130,15 @@ class CrossAttentionLayer(nn.Module):
                                  memory_key_padding_mask, pos, query_pos)
 
 class DyT(nn.Module):
-    def __init__(self, d_model):
+    def __init__(self, c, init_alpha):
         super().__init__()
-        self.scale = nn.Parameter(torch.ones(d_model))
-        self.bias = nn.Parameter(torch.zeros(d_model))
-
+        self.alpha = nn.Parameter(torch.ones(1) * init_alpha)
+        self.r = nn.Parameter(torch.ones(c))
+        self.beta = nn.Parameter(torch.zeros(c))
 
     def forward(self, x):
-        mean = x.mean(dim=-1, keepdim=True)
-        std = x.std(dim=-1, keepdim=True)
-        return (x - mean) / (std + 1e-6) * self.scale + self.bias
+        x = tanh(self.alpha * x)
+        return self.r * x + self.beta
 
 class FFNLayer(nn.Module):
     def __init__(self, d_model, dim_feedforward=2048, dropout=0.0,
@@ -149,8 +149,8 @@ class FFNLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.linear2 = nn.Linear(dim_feedforward, d_model)
 
-        self.norm = nn.LayerNorm(d_model)
-        # self.norm = DyT(d_model)  # Replaced nn.LayerNorm with DyT
+        # self.norm = nn.LayerNorm(d_model)
+        self.norm = DyT(d_model, dim_feedforward, 0.5)  # Replaced nn.LayerNorm with DyT
         
         self.activation = _get_activation_fn(activation)
         self.normalize_before = normalize_before

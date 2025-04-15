@@ -66,7 +66,7 @@ def main(args=None):
     trainer = Trainer(opt)
     os.environ['TORCH_DISTRIBUTED_DEBUG']='DETAIL'
 
-    if command == "train":
+    if command == "train": 
         if opt['rank'] == 0 and opt['WANDB']:
             wandb.login(key=os.environ['WANDB_KEY'])
             init_wandb(opt, trainer.save_folder, job_name=trainer.save_folder)
@@ -130,8 +130,8 @@ def main(args=None):
             except Exception as e:
                 logger.error(f"Qualcomm AI Hub integration failed: {str(e)}")
                     
-        elif command == "evaluate":
-            trainer.eval()
+    elif command == "evaluate":
+        trainer.eval()
     else:
         raise ValueError(f"Unknown command: {command}")
 
