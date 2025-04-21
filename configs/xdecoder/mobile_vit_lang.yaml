@@ -15,7 +15,7 @@ base_path: "./"
 RESUME: false
 WEIGHT: false
 RESET_DATA_LOADER: false
-RESUME_FROM: ''
+RESUME_FROM: 'xdecoder_data/pretrained_weights/mobilevit_s.pt'
 EVAL_AT_START: False
 
 # Logging and Debug

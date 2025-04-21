@@ -39,16 +39,25 @@ def build_baseline_model(image_input, text_input, output_path="./compile_and_pro
         XDecoder model instance
     """
     # load configs and pretrained weights
-    conf_file = "./configs/xdecoder/focalt_unicl_lang_lpcvc25.yaml"
+    conf_file = "./configs/xdecoder/mobile_vit_lang.yaml"
     opt = load_opt_from_config_files([conf_file])
 
-    pretrained_path = "./lpcvc_track2_models/model_state_dict.pt"
+    pretrained_path = opt['RESUME_FROM']
     ckpt = torch.load(pretrained_path)
 
     # build backbone
     backbone = build_backbone(opt).to(device)
-    backbone.load_state_dict({k.replace('backbone.', ''): v for k,v in ckpt.items() if 'backbone' in k}, strict=True)
+    
+    # 載入權重
+    if 'module' in ckpt:
+        ckpt = ckpt['module']
+        
+    # 移除 'module.' 前綴
+    ckpt = {key.replace('module.',''):ckpt[key] for key in ckpt.keys()}
 
+    # 載入 backbone 權重
+    backbone.load_state_dict({k.replace('backbone.', ''): v for k,v in ckpt.items() if 'backbone' in k}, strict=False)
+    
     # build multi-scale feature extractor
     backbone_out_feats = [96, 192, 384, 768]
     backbone_out_strides = [4, 8, 16, 32]
@@ -58,11 +67,18 @@ def build_baseline_model(image_input, text_input, output_path="./compile_and_pro
                    'res5': ShapeSpec(channels=backbone_out_feats[3], stride=backbone_out_strides[3])}
     
     multi_scale_feature_extractor = build_encoder(opt, input_shape).to(device)
-    multi_scale_feature_extractor.load_state_dict({k.replace('sem_seg_head.pixel_decoder.', ''): v for k,v in ckpt.items() if 'sem_seg_head.pixel_decoder' in k}, strict=True)
+    
+    # 載入 multi_scale_feature_extractor 權重
+    pixel_decoder_weights = {k.replace('sem_seg_head.pixel_decoder.', ''): v 
+                            for k,v in ckpt.items() 
+                            if 'sem_seg_head.pixel_decoder' in k}
+    multi_scale_feature_extractor.load_state_dict(pixel_decoder_weights, strict=False)
     
     # build lang_encoder
     lang_encoder = build_language_encoder(opt).to(device)
-    lang_encoder.load_state_dict({k.replace('sem_seg_head.predictor.lang_encoder.', ''): v for k,v in ckpt.items() if 'sem_seg_head.predictor.lang_encoder' in k}, strict=True)
+    
+    # 載入 lang_encoder 權重
+    lang_encoder.load_state_dict({k.replace('lang_encoder.', ''): v for k,v in ckpt.items() if 'lang_encoder' in k}, strict=False)
 
     with torch.no_grad():
         lang_encoder.eval()

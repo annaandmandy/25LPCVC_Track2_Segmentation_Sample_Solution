@@ -24,6 +24,7 @@ from detectron2.data import transforms as T
 from detectron2.data import detection_utils as utils
 import onnxruntime
 import qai_hub as hub
+import cv2
 
 # Set device for PyTorch operations
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -168,13 +169,13 @@ def compile_and_profile_aihub(model_path="./compile_and_profile/onnx/model.onnx"
     # Submit compilation job to AIHub
     compile_job = hub.submit_compile_job(
         model=model_path,
-        name="lpcvc25_track2_sample_solution",
+        name="lpcvc25_track2_mobileViT",
         device=hub.Device(deploy_device),
         options="--target_runtime qnn_context_binary",
     )
 
     # IMPORTANT! You must share your compile job to lpcvc organizers thus we can pull and evalaute it.
-    compile_job.modify_sharing(add_emails=['lowpowervision@gmail.com'])
+    #compile_job.modify_sharing(add_emails=['lowpowervision@gmail.com'])
     model = compile_job.get_target_model()
     
     # Download compiled model if requested
@@ -185,7 +186,7 @@ def compile_and_profile_aihub(model_path="./compile_and_profile/onnx/model.onnx"
     # Profile model if requested
     if profile:
         profile_job = hub.submit_profile_job(
-            name="lpcvc25_track2_sample_solution",
+            name="lpcvc25_track2_mobileViT",
             model=model, 
             device=hub.Device(deploy_device)
         )
@@ -215,7 +216,7 @@ def inference_aihub(model, image_input, text_input, deploy_device="Snapdragon X 
     
     # Submit inference job
     inference_job = hub.submit_inference_job(
-        name="lpcvc25_track2_sample_solution",
+        name="lpcvc25_track2_mobileViT",
         model=model,
         device=hub.Device(deploy_device),
         inputs=aihub_inputs

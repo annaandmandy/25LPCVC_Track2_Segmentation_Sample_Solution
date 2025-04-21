@@ -1,0 +1,457 @@
+ADE20K:
+  DATASET:
+    DATASET: ade
+  INPUT:
+    COLOR_AUG_SSD: true
+    CROP:
+      ENABLED: true
+      SINGLE_CATEGORY_MAX_AREA: 1.0
+      SIZE: (640, 640)
+      TYPE: absolute
+    DATASET_MAPPER_NAME: mask_former_panoptic
+    FORMAT: RGB
+    MASK_FORMAT: polygon
+    MAX_SIZE_TEST: 2560
+    MAX_SIZE_TRAIN: 2560
+    MIN_SIZE_TEST: 640
+    MIN_SIZE_TRAIN: 640
+    MIN_SIZE_TRAIN_SAMPLING: choice
+    SIZE_DIVISIBILITY: 640
+  TEST:
+    BATCH_SIZE_TOTAL: 1
+BDD:
+  DATALOADER:
+    ASPECT_RATIO_GROUPING: false
+    FILTER_EMPTY_ANNOTATIONS: false
+    LOAD_PROPOSALS: false
+    NUM_WORKERS: 0
+    SAMPLER_TRAIN: TrainingSampler
+  INPUT:
+    MAX_SIZE_TEST: 1333
+    MIN_SIZE_TEST: 800
+    PIXEL_MEAN:
+    - 123.675
+    - 116.28
+    - 103.53
+    PIXEL_STD:
+    - 58.395
+    - 57.12
+    - 57.375
+  TEST:
+    BATCH_SIZE_TOTAL: 2
+CITY:
+  DATALOADER:
+    FILTER_EMPTY_ANNOTATIONS: true
+    NUM_WORKERS: 4
+  INPUT:
+    COLOR_AUG_SSD: true
+    CROP:
+      ENABLED: true
+      SINGLE_CATEGORY_MAX_AREA: 1.0
+      SIZE: (512, 1024)
+      TYPE: absolute
+    DATASET_MAPPER_NAME: mask_former_panoptic
+    FORMAT: RGB
+    MASK_FORMAT: polygon
+    MAX_SIZE_TEST: 2048
+    MAX_SIZE_TRAIN: 4096
+    MIN_SIZE_TEST: 1024
+    MIN_SIZE_TRAIN: 1024
+    MIN_SIZE_TRAIN_SAMPLING: choice
+    SIZE_DIVISIBILITY: -1
+  TEST:
+    AUG:
+      ENABLED: false
+      FLIP: true
+      MAX_SIZE: 4096
+      MIN_SIZES:
+      - 512
+      - 768
+      - 1024
+      - 1280
+      - 1536
+      - 1792
+    BATCH_SIZE_TOTAL: 2
+    EVAL_PERIOD: 5000
+COCO:
+  DATALOADER:
+    ASPECT_RATIO_GROUPING: true
+    FILTER_EMPTY_ANNOTATIONS: false
+    LOAD_PROPOSALS: false
+    NUM_WORKERS: 2
+    SAMPLER_TRAIN: TrainingSampler
+  DATASET:
+    DATASET: coco
+  INPUT:
+    COLOR_AUG_SSD: false
+    CROP:
+      ENABLED: true
+    DATASET_MAPPER_NAME: coco_panoptic_lsj
+    FORMAT: RGB
+    IGNORE_VALUE: 255
+    IMAGE_SIZE: 512
+    MASK_FORMAT: polygon
+    MAX_SCALE: 2.0
+    MAX_SIZE_TEST: 1333
+    MAX_SIZE_TRAIN: 1333
+    MIN_SCALE: 0.1
+    MIN_SIZE_TEST: 800
+    MIN_SIZE_TRAIN: 800
+    MIN_SIZE_TRAIN_SAMPLING: choice
+    RANDOM_FLIP: horizontal
+    SIZE_DIVISIBILITY: 32
+  TEST:
+    AUG:
+      ENABLED: false
+    BATCH_SIZE_TOTAL: 1
+    DETECTIONS_PER_IMAGE: 100
+    IOU_TYPE:
+    - bbox
+    - segm
+    MODEL_FILE: ''
+    NAME: coco_eval
+    USE_MULTISCALE: false
+  TRAIN:
+    ASPECT_RATIO_GROUPING: true
+    BATCH_SIZE_PER_GPU: 1
+    BATCH_SIZE_TOTAL: 1
+    SHUFFLE: true
+CUDA: true
+DATALOADER:
+  ASPECT_RATIO_GROUPING: true
+  FILTER_EMPTY_ANNOTATIONS: false
+  LOAD_PROPOSALS: false
+  NUM_WORKERS: 16
+  SAMPLER_TRAIN: TrainingSampler
+DATASETS:
+  PROPOSAL_FILES_TRAIN: []
+  SIZE_DIVISIBILITY: 32
+  TEST:
+  - refcocog_val_umd
+  TRAIN:
+  - coco_2017_train_panoptic_filtall_with_sem_seg_caption_grounding
+EVAL_AT_START: false
+EVAL_PER_UPDATE_NUM: 0
+FIND_UNUSED_PARAMETERS: false
+FP16: true
+GRADIENT_ACCUMULATE_STEP: 1
+INPUT:
+  PIXEL_MEAN:
+  - 123.675
+  - 116.28
+  - 103.53
+  PIXEL_STD:
+  - 58.395
+  - 57.12
+  - 57.375
+LOADER:
+  JOINT: true
+  KEY_DATASET: coco
+LOG_EVERY: 100
+LR_SCHEDULER_PARAMS: {}
+MODEL:
+  BACKBONE:
+    LOAD_PRETRAINED: false
+    MOBILEVIT:
+      DEPTHS:
+      - 2
+      - 4
+      - 3
+      DIMS:
+      - 64
+      - 96
+      - 128
+      - 160
+      OUT_FEATURES:
+      - res2
+      - res3
+      - res4
+    NAME: MobileViT
+    PRETRAINED: false
+  BACKBONE_DIM: 768
+  DECODER:
+    BACKBONER_WEIGHT: 8.0
+    BBOX_WEIGHT: 5.0
+    CAPTION:
+      ENABLED: true
+      PHRASE_PROB: 0.0
+      SIM_THRES: 0.95
+    CAPTIONING:
+      ENABLED: false
+      STEP: 50
+    CAPTIONING_WEIGHT: 4.0
+    CAPTION_WEIGHT: 1.0
+    CLASS_WEIGHT: 2.0
+    DEC_LAYERS: 10
+    DEEP_SUPERVISION: true
+    DETECTION: false
+    DICE_WEIGHT: 5.0
+    DIM_FEEDFORWARD: 2048
+    DROPOUT: 0.0
+    ENFORCE_INPUT_PROJ: false
+    GCLASS_WEIGHT: 0.4
+    GDICE_WEIGHT: 1.0
+    GIOU_WEIGHT: 2.0
+    GMASK_WEIGHT: 1.0
+    GROUNDING:
+      CLASS_WEIGHT: 0.5
+      ENABLED: true
+      MAX_LEN: 5
+      TEXT_WEIGHT: 1.0
+    HIDDEN_DIM: 512
+    IMPORTANCE_SAMPLE_RATIO: 0.75
+    MASK: true
+    MASK_WEIGHT: 5.0
+    NAME: xdecoder
+    NHEADS: 8
+    NO_OBJECT_WEIGHT: 0.1
+    NUM_OBJECT_QUERIES: 101
+    OCLASS_WEIGHT: 0.4
+    ODICE_WEIGHT: 1.0
+    OMASK_WEIGHT: 1.0
+    OVERSAMPLE_RATIO: 3.0
+    PRE_NORM: false
+    RETRIEVAL:
+      DIM_IMG: 768
+      ENABLED: false
+      ENSEMBLE: true
+    RETRIEVAL_WEIGHT: 4.0
+    SIZE_DIVISIBILITY: 32
+    TEST:
+      INSTANCE_ON: true
+      OBJECT_MASK_THRESHOLD: 0.8
+      OVERLAP_THRESHOLD: 0.8
+      PANOPTIC_ON: true
+      SEMANTIC_ON: true
+      SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE: false
+    TOP_CAPTIONING_LAYERS: 2
+    TOP_CAPTION_LAYERS: 3
+    TOP_GROUNDING_LAYERS: 3
+    TOP_RETRIEVAL_LAYERS: 2
+    TRAIN_NUM_POINTS: 12544
+    TRANSFORMER_IN_FEATURE: multi_scale_pixel_decoder
+  DIM_PROJ: 512
+  ENCODER:
+    COMMON_STRIDE: 4
+    CONVS_DIM: 512
+    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES:
+    - res3
+    - res4
+    - res5
+    IGNORE_VALUE: 255
+    IN_FEATURES:
+    - res2
+    - res3
+    - res4
+    - res5
+    LOSS_WEIGHT: 1.0
+    MASK_DIM: 512
+    NAME: transformer_encoder_fpn
+    NORM: GN
+    NUM_CLASSES: 133
+    TRANSFORMER_ENC_LAYERS: 6
+  HEAD: xdecoder_head
+  KEYPOINT_ON: false
+  LOAD_PROPOSALS: false
+  MASK_ON: false
+  NAME: xdecoder_model
+  TEXT:
+    ARCH: vlpencoder
+    AUTOGRESSIVE: true
+    CONTEXT_LENGTH: 77
+    HEADS: 8
+    LAYERS: 12
+    NAME: transformer
+    TOKENIZER: clip
+    WIDTH: 512
+PIPELINE: XDecoderPipeline
+PORT: '36874'
+REF:
+  DATALOADER:
+    ASPECT_RATIO_GROUPING: false
+    FILTER_EMPTY_ANNOTATIONS: false
+    LOAD_PROPOSALS: false
+    NUM_WORKERS: 0
+    SAMPLER_TRAIN: TrainingSampler
+  INPUT:
+    FORMAT: RGB
+    MAX_SIZE_TEST: 1024
+    MIN_SIZE_TEST: 512
+    PIXEL_MEAN:
+    - 123.675
+    - 116.28
+    - 103.53
+    PIXEL_STD:
+    - 58.395
+    - 57.12
+    - 57.375
+  TEST:
+    BATCH_SIZE_TOTAL: 1
+RESET_DATA_LOADER: false
+RESUME: false
+RESUME_FROM: xdecoder_data/pretrained_weights/mobilevit_s.pt
+SAVE_DIR: outputs
+SCAN:
+  DATALOADER:
+    ASPECT_RATIO_GROUPING: false
+    FILTER_EMPTY_ANNOTATIONS: false
+    LOAD_PROPOSALS: false
+    NUM_WORKERS: 0
+    SAMPLER_TRAIN: TrainingSampler
+  INPUT:
+    MAX_SIZE_TEST: 1024
+    MIN_SIZE_TEST: 512
+    PIXEL_MEAN:
+    - 123.675
+    - 116.28
+    - 103.53
+    PIXEL_STD:
+    - 58.395
+    - 57.12
+    - 57.375
+  TEST:
+    BATCH_SIZE_TOTAL: 2
+SOLVER:
+  AMP:
+    ENABLED: true
+  BASE_LR: 1.0e-05
+  CLIP_GRADIENTS:
+    CLIP_TYPE: full_model
+    CLIP_VALUE: 5.0
+    ENABLED: true
+    NORM_TYPE: 2.0
+  GAMMA: 0.1
+  LR_MULTIPLIER:
+    backbone: 0.1
+    lang_encoder: 0.1
+  LR_SCHEDULER_NAME: WarmupMultiStepLR
+  MAX_ITER: 1
+  MAX_NUM_EPOCHS: 2
+  OPTIMIZER: ADAMW
+  STEPS:
+  - 0.88889
+  - 0.96296
+  WARMUP_FACTOR: 1.0
+  WARMUP_ITERS: 10
+  WARMUP_METHOD: linear
+  WEIGHT_DECAY: 0.05
+  WEIGHT_DECAY_EMBED: 0.0
+  WEIGHT_DECAY_NORM: 0.0
+SUN:
+  DATALOADER:
+    ASPECT_RATIO_GROUPING: false
+    FILTER_EMPTY_ANNOTATIONS: false
+    LOAD_PROPOSALS: false
+    NUM_WORKERS: 0
+    SAMPLER_TRAIN: TrainingSampler
+  INPUT:
+    MAX_SIZE_TEST: 1024
+    MIN_SIZE_TEST: 512
+    PIXEL_MEAN:
+    - 123.675
+    - 116.28
+    - 103.53
+    PIXEL_STD:
+    - 58.395
+    - 57.12
+    - 57.375
+  TEST:
+    BATCH_SIZE_TOTAL: 2
+TRAINER: xdecoder
+VERBOSE: true
+VLP:
+  DATALOADER:
+    ASPECT_RATIO_GROUPING: true
+    FILTER_EMPTY_ANNOTATIONS: false
+    LOAD_PROPOSALS: false
+    NUM_WORKERS: 1
+    SAMPLER_TRAIN: TrainingSampler
+  INPUT:
+    COLOR_AUG_SSD: false
+    CROP:
+      ENABLED: true
+    DATASET_MAPPER_NAME: vlpretrain
+    FORMAT: RGB
+    IGNORE_VALUE: 255
+    IMAGE_SIZE: 224
+    MASK_FORMAT: polygon
+    SIZE_DIVISIBILITY: 32
+  TEST:
+    BATCH_SIZE_TOTAL: 1
+  TRAIN:
+    BATCH_SIZE_PER_GPU: 1
+    BATCH_SIZE_TOTAL: 1
+WANDB: true
+WEIGHT: true
+base_path: ./
+command: train
+conf_files:
+- configs/xdecoder/mobile_vit_lang.yaml
+device: !!python/object/apply:torch.device
+- cuda
+- 0
+local_rank: 0
+local_size: 1
+overrides:
+- FP16
+- 'True'
+- PORT
+- '36874'
+- SOLVER.MAX_NUM_EPOCHS
+- '2'
+- COCO.INPUT.IMAGE_SIZE
+- '512'
+- MODEL.DECODER.HIDDEN_DIM
+- '512'
+- MODEL.ENCODER.CONVS_DIM
+- '512'
+- MODEL.ENCODER.MASK_DIM
+- '512'
+- MODEL.DECODER.CAPTIONING.ENABLED
+- 'False'
+- MODEL.DECODER.RETRIEVAL.ENABLED
+- 'False'
+- MODEL.DECODER.GROUNDING.ENABLED
+- 'True'
+- MODEL.DECODER.CAPTIONING_WEIGHT
+- '4'
+- MODEL.DECODER.RETRIEVAL_WEIGHT
+- '4'
+- MODEL.DECODER.TOP_CAPTIONING_LAYERS
+- '2'
+- MODEL.DECODER.TOP_RETRIEVAL_LAYERS
+- '2'
+- MODEL.DECODER.TOP_GROUNDING_LAYERS
+- '3'
+- MODEL.DECODER.GROUNDING.TEXT_WEIGHT
+- '1.0'
+- MODEL.DECODER.GROUNDING.CLASS_WEIGHT
+- '0.5'
+- COCO.TEST.BATCH_SIZE_TOTAL
+- '1'
+- COCO.TRAIN.BATCH_SIZE_TOTAL
+- '1'
+- COCO.TRAIN.BATCH_SIZE_PER_GPU
+- '1'
+- VLP.TEST.BATCH_SIZE_TOTAL
+- '1'
+- VLP.TRAIN.BATCH_SIZE_TOTAL
+- '1'
+- VLP.TRAIN.BATCH_SIZE_PER_GPU
+- '1'
+- VLP.DATALOADER.NUM_WORKERS
+- '1'
+- ADE20K.TEST.BATCH_SIZE_TOTAL
+- '1'
+- REF.TEST.BATCH_SIZE_TOTAL
+- '1'
+- SOLVER.LR_MULTIPLIER.lang_encoder
+- '0.1'
+- WEIGHT
+- 'True'
+- SAVE_DIR
+- ./outputs
+- RESUME_FROM
+- xdecoder_data/pretrained_weights/mobilevit_s.pt
+rank: 0
+world_size: 1

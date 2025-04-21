@@ -15,7 +15,7 @@ base_path: "./"
 RESUME: false
 WEIGHT: false
 RESET_DATA_LOADER: false
-RESUME_FROM: ''
+RESUME_FROM: 'data/output/test/focalt_unicl_lang_finetune.yaml_conf~/run_31/00014072/default/model_state_dict.pt'
 EVAL_AT_START: False
 
 # Logging and Debug
@@ -44,12 +44,10 @@ MODEL:
   LOAD_PROPOSALS: false
   DIM_PROJ: 512
   BACKBONE_DIM: 768
-  LANGUAGE_ENCODER: "MobileBERT"  # Specify MobileBERT as the language encoder
-  LANGUAGE_ENCODER_DIM: 512      # Set the embedding dimension for MobileBERT
   TEXT:
     ARCH: vlpencoder
     NAME: transformer
-    TOKENIZER:  mobilebert # Specify the tokenizer for MobileBERT
+    TOKENIZER: clip
     CONTEXT_LENGTH: 77 # 77
     WIDTH: 512
     HEADS: 8

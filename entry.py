@@ -39,6 +39,34 @@ def init_wandb(args, job_dir, entity='lpcvc', project='xdecoder', job_name='tmp'
     open(f"{wandb_dir}/runid.txt", 'w').write(wandb.run.id)
     wandb.config.update({k: args[k] for k in args if k not in wandb.config})
 
+
+def compile_and_profile_model_on_aihub(model, sample_input, save_dir, model_name="xdecoder"):
+    try:
+        traced_model = torch.jit.trace(model, example_inputs=sample_input)
+
+        compile_job = hub.submit_compile_job(
+            model=traced_model,
+            device=hub.Device('Qualcomm Snapdragon X Elite CRD'),
+            input_specs={'image': {'shape': [1, 3, 512, 512], 'dtype': 'float32'}},
+            options="--target_runtime ai_engine"
+        )
+        compile_job.wait()
+
+        if compile_job.success:
+            profile_job = hub.submit_profile_job(
+                model=compile_job.get_target_model(),
+                device=hub.Device('Qualcomm Snapdragon X Elite CRD'),
+            )
+            profile_job.wait()
+
+            model_path = os.path.join(save_dir, f"compiled_{model_name}.tflite")
+            compile_job.get_target_model().download(model_path)
+            logger.info(f"Compiled model saved to {model_path}")
+        else:
+            logger.error(f"Compilation failed: {compile_job.status.message}")
+    except Exception as e:
+        logger.error(f"AI Hub integration failed: {str(e)}")
+
 def main(args=None):
     '''
     [Main function for the entry point]
@@ -87,51 +115,41 @@ def main(args=None):
                 torch.save(trainer.model.state_dict(), save_path)
                 logger.info(f"Saved model to {save_path}")
             
-            # Compile and profile the model on Qualcomm AI Hub
-            logger.info("Compiling and profiling the model on Qualcomm AI Hub...")
-            try:
-                # Get a representative input sample from your dataloader
-                sample = next(iter(trainer.val_loader))  # or use trainer.train_loader
-                
-                # Prepare inputs for tracing
-                if hasattr(trainer.model, 'prepare_inputs_for_tracing'):
-                    example_inputs = trainer.model.prepare_inputs_for_tracing(sample)
-                else:
-                    # Fallback to a simple image input if no special preparation method exists
-                    example_inputs = {'image': sample['image'][:1].to('cuda')}  # take first item in batch
-                
-                # Trace the model
-                traced_model = torch.jit.trace(trainer.model, example_inputs=example_inputs)
-                
-                # Submit to Qualcomm AI Hub with more appropriate settings
-                compile_job = hub.submit_compile_job(
-                    model=traced_model,
-                    device=hub.Device('Qualcomm Snapdragon X Elite CRD'),  # More generic target
-                    input_specs={'image': {'shape': [1, 3, 512, 512], 'dtype': 'float32'}},
-                    options="--target_runtime ai_engine"
-                )
-                
-                # Wait for completion and handle results
-                compile_job.wait()
-                if compile_job.success:
-                    profile_job = hub.submit_profile_job(
-                        model=compile_job.get_target_model(),
-                        device=hub.Device('Qualcomm Snapdragon X Elite CRD'),
-                    )
-                    profile_job.wait()
-                    
-                    # Save compiled model with better naming
-                    model_path = os.path.join(save_dir, f"compiled_{opt['MODEL']['NAME']}.tflite")
-                    compile_job.get_target_model().download(model_path)
-                    logger.info(f"Successfully compiled model saved to {model_path}")
-                else:
-                    logger.error(f"Compilation failed: {compile_job.status.message}")
-                    
-            except Exception as e:
-                logger.error(f"Qualcomm AI Hub integration failed: {str(e)}")
+            # After saving model
+            if hasattr(trainer.model, 'prepare_inputs_for_tracing'):
+                example_inputs = trainer.model.prepare_inputs_for_tracing(sample)
+            else:
+                example_inputs = {'image': sample['image'][:1].to('cuda')}
+
+            compile_and_profile_model_on_aihub(trainer.model, example_inputs, save_dir, opt['MODEL']['NAME'])
+
                     
     elif command == "evaluate":
         trainer.eval()
+
+    elif command == "compile":
+        save_dir = opt.get('SAVE_DIR', './output')
+        os.makedirs(save_dir, exist_ok=True)
+
+        # Initialize trainer
+        trainer = Trainer(opt)
+        trainer.load_model(opt['RESUME_FROM'])  # This loads your pre-trained weights
+
+        # Get a representative sample input from validation set
+        sample = next(iter(trainer.val_loader))
+
+        if hasattr(trainer.model, 'prepare_inputs_for_tracing'):
+            example_inputs = trainer.model.prepare_inputs_for_tracing(sample)
+        else:
+            example_inputs = {'image': sample['image'][:1].to('cuda')}  # Default fallback
+
+        compile_and_profile_model_on_aihub(
+            model=trainer.model,
+            sample_input=example_inputs,
+            save_dir=save_dir,
+            model_name=opt['MODEL']['NAME']
+        )
+
     else:
         raise ValueError(f"Unknown command: {command}")
 
