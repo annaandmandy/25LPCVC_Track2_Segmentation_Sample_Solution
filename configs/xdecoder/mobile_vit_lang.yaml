@@ -60,14 +60,14 @@ MODEL:
     MOBILEVIT:
       DIMS: [64, 96, 128, 160]
       DEPTHS: [2, 4, 3]
-      OUT_FEATURES: ["res2", "res3", "res4"]
+      OUT_FEATURES: ["res2", "res3", "res4", "res5"]
   ENCODER:
     NAME: transformer_encoder_fpn
     IGNORE_VALUE: 255
     NUM_CLASSES: 133
     LOSS_WEIGHT: 1.0
-    CONVS_DIM: 512
-    MASK_DIM: 512
+    CONVS_DIM: 160
+    MASK_DIM: 160
     NORM: "GN"
     IN_FEATURES: ["res2", "res3", "res4", "res5"]
     DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: ["res3", "res4", "res5"]

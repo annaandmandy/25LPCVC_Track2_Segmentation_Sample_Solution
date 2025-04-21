@@ -146,16 +146,19 @@ class D2MobileViT(MobileViT, Backbone):
             "res2": 8,
             "res3": 16,
             "res4": 32,
+            "res5": 32,
         }
         self._out_feature_channels = {
             "res2": dims[1],
             "res3": dims[2],
             "res4": dims[3],
+            "res5": dims[3],
         }
 
     def forward(self, x):
         assert x.dim() == 4, f"MobileViT expects (N, C, H, W). Got {x.shape}"
         outputs = super().forward(x)
+        outputs["res5"] = outputs["res4"]
         return {k: v for k, v in outputs.items() if k in self._out_features}
 
     def output_shape(self):
