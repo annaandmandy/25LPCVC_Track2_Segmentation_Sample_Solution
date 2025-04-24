@@ -17,7 +17,8 @@ class SelfAttentionLayer(nn.Module):
         super().__init__()
         self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
 
-        self.norm = nn.LayerNorm(d_model)
+        #self.norm = nn.LayerNorm(d_model)
+        self.norm = DyT(d_model, init_alpha=0.5)
         self.dropout = nn.Dropout(dropout)
 
         self.activation = _get_activation_fn(activation)
@@ -75,7 +76,8 @@ class CrossAttentionLayer(nn.Module):
         super().__init__()
         self.multihead_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
 
-        self.norm = nn.LayerNorm(d_model)
+        #self.norm = nn.LayerNorm(d_model)
+        self.norm = DyT(d_model, init_alpha=0.5) 
         self.dropout = nn.Dropout(dropout)
 
         self.activation = _get_activation_fn(activation)
@@ -145,16 +147,18 @@ class FFNLayer(nn.Module):
                  activation="relu", normalize_before=False):
         super().__init__()
         # Implementation of Feedforward model
-        self.linear1 = nn.Linear(d_model, dim_feedforward)
+        # self.linear1 = nn.Linear(d_model, dim_feedforward) #Z comment this out
+        self.linear_v = nn.Linear(d_model, dim_feedforward) # Z added this
+        self.linear_g = nn.Linear(d_model, dim_feedforward) # Z added this 
+        
         self.dropout = nn.Dropout(dropout)
         self.linear2 = nn.Linear(dim_feedforward, d_model)
 
         # self.norm = nn.LayerNorm(d_model)
-        self.norm = DyT(d_model, dim_feedforward, 0.5)  # Replaced nn.LayerNorm with DyT
+        self.norm = DyT(d_model, init_alpha=0.5)  # Replaced nn.LayerNorm with DyT
         
-        self.activation = _get_activation_fn(activation)
+        # self.activation = _get_activation_fn(activation) # Z comment this out, won't use activation
         self.normalize_before = normalize_before
-
 
         self._reset_parameters()
    
@@ -169,7 +173,8 @@ class FFNLayer(nn.Module):
 
 
     def forward_post(self, tgt):
-        tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
+        # tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt)))) #Z comment this out 
+        tgt2 = self.linear2(self.dropout(F.silu(self.linear_g(tgt)) * self.linear_v(tgt))) # Z added this
         tgt = tgt + self.dropout(tgt2)
         tgt = self.norm(tgt)
         return tgt
@@ -177,7 +182,8 @@ class FFNLayer(nn.Module):
 
     def forward_pre(self, tgt):
         tgt2 = self.norm(tgt)
-        tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt2))))
+        # tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt2)))) #Z comment this out 
+        tgt2 = self.linear2(self.dropout(F.silu(self.linear_g(tgt2)) * self.linear_v(tgt2))) # Z added this
         tgt = tgt + self.dropout(tgt2)
         return tgt
 
@@ -186,8 +192,6 @@ class FFNLayer(nn.Module):
         if self.normalize_before:
             return self.forward_pre(tgt)
         return self.forward_post(tgt)
-
-
 
 
 def _get_activation_fn(activation):

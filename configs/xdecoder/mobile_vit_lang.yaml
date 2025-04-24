@@ -12,8 +12,8 @@ SAVE_DIR: './data/output/test'
 base_path: "./"
 
 # Resume Logistic
-RESUME: false
-WEIGHT: false
+RESUME: true
+WEIGHT: true
 RESET_DATA_LOADER: false
 RESUME_FROM: 'xdecoder_data/pretrained_weights/mobilevit_s.pt'
 EVAL_AT_START: False
@@ -55,10 +55,10 @@ MODEL:
     AUTOGRESSIVE: True
   BACKBONE:
     NAME: MobileViT  # <-- Switched to MobileViT
-    PRETRAINED: False
-    LOAD_PRETRAINED: False
+    PRETRAINED: True
+    LOAD_PRETRAINED: True
     MOBILEVIT:
-      DIMS: [64, 96, 128, 160]
+      DIMS: [96, 192, 288, 384]
       DEPTHS: [2, 4, 3]
       OUT_FEATURES: ["res2", "res3", "res4", "res5"]
   ENCODER:
@@ -66,8 +66,8 @@ MODEL:
     IGNORE_VALUE: 255
     NUM_CLASSES: 133
     LOSS_WEIGHT: 1.0
-    CONVS_DIM: 160
-    MASK_DIM: 160
+    CONVS_DIM: 512
+    MASK_DIM: 512
     NORM: "GN"
     IN_FEATURES: ["res2", "res3", "res4", "res5"]
     DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: ["res3", "res4", "res5"]

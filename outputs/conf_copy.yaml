@@ -103,7 +103,7 @@ COCO:
   TEST:
     AUG:
       ENABLED: false
-    BATCH_SIZE_TOTAL: 1
+    BATCH_SIZE_TOTAL: 8
     DETECTIONS_PER_IMAGE: 100
     IOU_TYPE:
     - bbox
@@ -113,8 +113,8 @@ COCO:
     USE_MULTISCALE: false
   TRAIN:
     ASPECT_RATIO_GROUPING: true
-    BATCH_SIZE_PER_GPU: 1
-    BATCH_SIZE_TOTAL: 1
+    BATCH_SIZE_PER_GPU: 8
+    BATCH_SIZE_TOTAL: 8
     SHUFFLE: true
 CUDA: true
 DATALOADER:
@@ -151,23 +151,48 @@ LOG_EVERY: 100
 LR_SCHEDULER_PARAMS: {}
 MODEL:
   BACKBONE:
-    LOAD_PRETRAINED: false
-    MOBILEVIT:
+    FOCAL:
       DEPTHS:
       - 2
-      - 4
+      - 2
+      - 6
+      - 2
+      DROP_PATH_RATE: 0.3
+      DROP_RATE: 0.0
+      EMBED_DIM: 96
+      FOCAL_LEVELS:
       - 3
-      DIMS:
-      - 64
-      - 96
-      - 128
-      - 160
+      - 3
+      - 3
+      - 3
+      FOCAL_WINDOWS:
+      - 3
+      - 3
+      - 3
+      - 3
+      MLP_RATIO: 4.0
       OUT_FEATURES:
       - res2
       - res3
       - res4
-    NAME: MobileViT
-    PRETRAINED: false
+      - res5
+      OUT_INDICES:
+      - 0
+      - 1
+      - 2
+      - 3
+      PATCH_NORM: true
+      PATCH_SIZE: 4
+      PRETRAIN_IMG_SIZE: 224
+      SCALING_MODULATOR: true
+      USE_CHECKPOINT: false
+      USE_CONV_EMBED: true
+      USE_LAYERSCALE: true
+      USE_POSTLN: true
+      USE_POSTLN_IN_MODULATION: false
+    LOAD_PRETRAINED: false
+    NAME: focal_dw
+    PRETRAINED: ''
   BACKBONE_DIM: 768
   DECODER:
     BACKBONER_WEIGHT: 8.0
@@ -289,7 +314,7 @@ REF:
     BATCH_SIZE_TOTAL: 1
 RESET_DATA_LOADER: false
 RESUME: false
-RESUME_FROM: xdecoder_data/pretrained_weights/mobilevit_s.pt
+RESUME_FROM: outputs/focalt_unicl_lang_finetune.yaml_conf~/run_13/00028144/default/model_state_dict.pt
 SAVE_DIR: outputs
 SCAN:
   DATALOADER:
@@ -364,7 +389,7 @@ VLP:
     ASPECT_RATIO_GROUPING: true
     FILTER_EMPTY_ANNOTATIONS: false
     LOAD_PROPOSALS: false
-    NUM_WORKERS: 1
+    NUM_WORKERS: 4
     SAMPLER_TRAIN: TrainingSampler
   INPUT:
     COLOR_AUG_SSD: false
@@ -377,16 +402,16 @@ VLP:
     MASK_FORMAT: polygon
     SIZE_DIVISIBILITY: 32
   TEST:
-    BATCH_SIZE_TOTAL: 1
+    BATCH_SIZE_TOTAL: 8
   TRAIN:
-    BATCH_SIZE_PER_GPU: 1
-    BATCH_SIZE_TOTAL: 1
+    BATCH_SIZE_PER_GPU: 8
+    BATCH_SIZE_TOTAL: 8
 WANDB: true
 WEIGHT: true
 base_path: ./
 command: train
 conf_files:
-- configs/xdecoder/mobile_vit_lang.yaml
+- configs/xdecoder/focalt_unicl_lang_swiGLUDYT.yaml
 device: !!python/object/apply:torch.device
 - cuda
 - 0
@@ -428,19 +453,19 @@ overrides:
 - MODEL.DECODER.GROUNDING.CLASS_WEIGHT
 - '0.5'
 - COCO.TEST.BATCH_SIZE_TOTAL
-- '1'
+- '8'
 - COCO.TRAIN.BATCH_SIZE_TOTAL
-- '1'
+- '8'
 - COCO.TRAIN.BATCH_SIZE_PER_GPU
-- '1'
+- '8'
 - VLP.TEST.BATCH_SIZE_TOTAL
-- '1'
+- '8'
 - VLP.TRAIN.BATCH_SIZE_TOTAL
-- '1'
+- '8'
 - VLP.TRAIN.BATCH_SIZE_PER_GPU
-- '1'
+- '8'
 - VLP.DATALOADER.NUM_WORKERS
-- '1'
+- '4'
 - ADE20K.TEST.BATCH_SIZE_TOTAL
 - '1'
 - REF.TEST.BATCH_SIZE_TOTAL
@@ -451,7 +476,5 @@ overrides:
 - 'True'
 - SAVE_DIR
 - ./outputs
-- RESUME_FROM
-- xdecoder_data/pretrained_weights/mobilevit_s.pt
 rank: 0
 world_size: 1

@@ -1,40 +1,30 @@
 # --------------------------------------------------------
-# X-Decoder -- Generalized Decoding for Pixel, Image, and Language
-# Copyright (c) 2022 Microsoft
-# Licensed under The MIT License [see LICENSE for details]
-# Written by Xueyan Zou (xueyan@cs.wisc.edu)
+# X-Decoder + LinearAttention + GAU Configuration
+# Efficient Open-Vocabulary Vision Model - LPCVC 2025
 # --------------------------------------------------------
 
-# Define Test/Trainer/Saving
 PIPELINE: XDecoderPipeline
 TRAINER: xdecoder
-SAVE_DIR: './data/output/mobilevit_test'
+SAVE_DIR: './data/output/test_linear_gau'
 base_path: "./"
 
-# Resume Logistic
 RESUME: false
 WEIGHT: false
 RESET_DATA_LOADER: false
-RESUME_FROM: ''
+RESUME_FROM: ''  # Optional pretrained model path
 EVAL_AT_START: False
 
-# Logging and Debug
 WANDB: True
 LOG_EVERY: 100
 FIND_UNUSED_PARAMETERS: false
 
-# Speed up training
 FP16: false
 PORT: '36873'
 
-# misc
 LOADER:
   JOINT: True
   KEY_DATASET: 'coco'
 
-##################
-# Task settings
-##################
 VERBOSE: true
 MODEL:
   NAME: xdecoder_model
@@ -54,18 +44,28 @@ MODEL:
     LAYERS: 12
     AUTOGRESSIVE: True
   BACKBONE:
-    NAME: efficientformer_l1 # Specify EfficientFormer as the backbone
-    VARIANT: l1            # Choose the variant (e.g., l1, l3, l7)
-    PRETRAINED: FALSE    # Use pretrained weights
-    LOAD_PRETRAINED: true  # Load pretrained weights
-    EFFICIENTFORMER:
-      IMG_SIZE: 224        # Input image size
-      PATCH_SIZE: 2        # Patch size for transformer blocks
-      EMBED_DIM: 96        # Embedding dimension
-      DEPTHS: [2, 4, 3]    # Depth of transformer blocks
-      NUM_HEADS: [2, 4, 6] # Number of attention heads
-      FFN_EXPANSION: 4     # Feed-forward network expansion ratio
-      DROPOUT: 0.1         # Dropout rate
+    NAME: focal_dw
+    PRETRAINED: ''
+    LOAD_PRETRAINED: false
+    FOCAL:
+      PRETRAIN_IMG_SIZE: 224
+      PATCH_SIZE: 4
+      EMBED_DIM: 96
+      DEPTHS: [2, 2, 6, 2]
+      FOCAL_LEVELS: [3, 3, 3, 3]
+      FOCAL_WINDOWS: [3, 3, 3, 3]
+      DROP_PATH_RATE: 0.3
+      MLP_RATIO: 4.0
+      DROP_RATE: 0.0
+      PATCH_NORM: True
+      USE_CONV_EMBED: True
+      SCALING_MODULATOR: True
+      USE_CHECKPOINT: False
+      USE_POSTLN: true
+      USE_POSTLN_IN_MODULATION: false
+      USE_LAYERSCALE: True
+      OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+      OUT_INDICES: [0, 1, 2, 3]
   ENCODER:
     NAME: transformer_encoder_fpn
     IGNORE_VALUE: 255
@@ -74,8 +74,8 @@ MODEL:
     CONVS_DIM: 512
     MASK_DIM: 512
     NORM: "GN"
-    IN_FEATURES: ["0", "1", "2", "3"]
-    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: ["1", "2", "3"]
+    IN_FEATURES: ["res2", "res3", "res4", "res5"]
+    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: ["res3", "res4", "res5"]
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   DECODER:
@@ -120,14 +120,14 @@ MODEL:
     NUM_OBJECT_QUERIES: 101
     NHEADS: 8
     DROPOUT: 0.0
-    DIM_FEEDFORWARD: 2048
+    DIM_FEEDFORWARD: 2048  # Used by FFN configs but not by GAU
     PRE_NORM: False
     ENFORCE_INPUT_PROJ: False
     SIZE_DIVISIBILITY: 32
     TRAIN_NUM_POINTS: 12544
     OVERSAMPLE_RATIO: 3.0
     IMPORTANCE_SAMPLE_RATIO: 0.75
-    DEC_LAYERS: 10
+    DEC_LAYERS: 10  # 9+1 decoder layers with GAU + LinearAttention
     TOP_GROUNDING_LAYERS: 3
     TOP_CAPTION_LAYERS: 3
     TOP_CAPTIONING_LAYERS: 3
@@ -140,7 +140,42 @@ MODEL:
       OBJECT_MASK_THRESHOLD: 0.8
       SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE: false
 
-# Remaining settings (COCO, VLP, SOLVER, etc.) can remain unchanged or be copied from the original config
-# depending on your training/evaluation focus.
+INPUT:
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
 
-# You can copy COCO, VLP, SOLVER, and DATASETS settings from the original config to extend this one if needed.
+DATASETS:
+  TRAIN: ["coco_2017_train_panoptic_filtall_with_sem_seg_caption_grounding"]
+  TEST: ["refcocog_val_umd"]
+
+DATALOADER:
+  FILTER_EMPTY_ANNOTATIONS: False
+  NUM_WORKERS: 16
+  LOAD_PROPOSALS: False
+  SAMPLER_TRAIN: "TrainingSampler"
+  ASPECT_RATIO_GROUPING: True
+
+SOLVER:
+  BASE_LR: 0.00001
+  STEPS: [0.88889, 0.96296]
+  MAX_ITER: 1
+  GAMMA: 0.1
+  WARMUP_FACTOR: 1.0
+  WARMUP_ITERS: 10
+  WARMUP_METHOD: "linear"
+  WEIGHT_DECAY: 0.05
+  OPTIMIZER: "ADAMW"
+  LR_SCHEDULER_NAME: "WarmupMultiStepLR"
+  LR_MULTIPLIER:
+    backbone: 0.1
+    lang_encoder: 0.1
+  WEIGHT_DECAY_NORM: 0.0
+  WEIGHT_DECAY_EMBED: 0.0
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 5.0
+    NORM_TYPE: 2.0
+  AMP:
+    ENABLED: True
+  MAX_NUM_EPOCHS: 5

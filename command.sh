@@ -9,7 +9,7 @@ export QUALCOMM_AI_HUB_KEY="44165a068eebd71635bbb8e9198756c50e392b02"
 # CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 
 # works with baseline model and FFN layer replacement
 python entry.py train \
-    --conf_files configs/xdecoder/mobile_vit_lang.yaml \
+    --conf_files configs/xdecoder/focalt_unicl_lang_swiGLUDYT.yaml \
     --overrides \
     FP16 True \
     PORT 36874 \
@@ -39,5 +39,4 @@ python entry.py train \
     REF.TEST.BATCH_SIZE_TOTAL 1 \
     SOLVER.LR_MULTIPLIER.lang_encoder 0.1 \
     WEIGHT True \
-    SAVE_DIR ./outputs \
-    RESUME_FROM xdecoder_data/pretrained_weights/mobilevit_s.pt
+    SAVE_DIR ./outputs

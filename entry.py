@@ -115,40 +115,9 @@ def main(args=None):
                 torch.save(trainer.model.state_dict(), save_path)
                 logger.info(f"Saved model to {save_path}")
             
-            # After saving model
-            if hasattr(trainer.model, 'prepare_inputs_for_tracing'):
-                example_inputs = trainer.model.prepare_inputs_for_tracing(sample)
-            else:
-                example_inputs = {'image': sample['image'][:1].to('cuda')}
-
-            compile_and_profile_model_on_aihub(trainer.model, example_inputs, save_dir, opt['MODEL']['NAME'])
-
                     
     elif command == "evaluate":
         trainer.eval()
-
-    elif command == "compile":
-        save_dir = opt.get('SAVE_DIR', './output')
-        os.makedirs(save_dir, exist_ok=True)
-
-        # Initialize trainer
-        trainer = Trainer(opt)
-        trainer.load_model(opt['RESUME_FROM'])  # This loads your pre-trained weights
-
-        # Get a representative sample input from validation set
-        sample = next(iter(trainer.val_loader))
-
-        if hasattr(trainer.model, 'prepare_inputs_for_tracing'):
-            example_inputs = trainer.model.prepare_inputs_for_tracing(sample)
-        else:
-            example_inputs = {'image': sample['image'][:1].to('cuda')}  # Default fallback
-
-        compile_and_profile_model_on_aihub(
-            model=trainer.model,
-            sample_input=example_inputs,
-            save_dir=save_dir,
-            model_name=opt['MODEL']['NAME']
-        )
 
     else:
         raise ValueError(f"Unknown command: {command}")

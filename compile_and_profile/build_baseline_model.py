@@ -16,7 +16,6 @@ from transformers import CLIPTokenizer
 from detectron2.modeling import ShapeSpec
 from detectron2.structures import ImageList
 
-# 直接定義 get_world_size 函數
 def get_world_size():
     if not torch.distributed.is_available():
         return 1
@@ -24,7 +23,6 @@ def get_world_size():
         return 1
     return torch.distributed.get_world_size()
 
-# 使用 sys.path 添加完整路徑
 project_root = "/projectnb/dl4ds/projects/LPCV_track2_awz/25LPCVC_Track2_Segmentation_Sample_Solution"
 sys.path.append(project_root)
 
@@ -51,7 +49,7 @@ def build_baseline_model(image_input, text_input, output_path="./compile_and_pro
         XDecoder model instance
     """
     # load configs and pretrained weights
-    conf_file = "./configs/xdecoder/mobile_vit_lang.yaml"
+    conf_file = "./configs/xdecoder/focalt_unicl_lang_swiGLUDYT.yaml"
     opt = load_opt_from_config_files([conf_file])
 
     pretrained_path = opt['RESUME_FROM']
@@ -59,15 +57,15 @@ def build_baseline_model(image_input, text_input, output_path="./compile_and_pro
 
     # build backbone
     backbone = build_backbone(opt).to(device)
-    # 載入權重
+ 
     if 'module' in ckpt:
         ckpt = ckpt['module']
         
-    # 如果是單 GPU 模式，移除 'module.' 前綴
+
     if get_world_size() <= 1:
         ckpt = {key.replace('module.',''):ckpt[key] for key in ckpt.keys()}
 
-    # 載入 backbone 權重
+
     backbone.load_state_dict({k.replace('backbone.', ''): v for k,v in ckpt.items() if 'backbone' in k}, strict=False)
     
     # build multi-scale feature extractor
@@ -79,7 +77,7 @@ def build_baseline_model(image_input, text_input, output_path="./compile_and_pro
                    'res5': ShapeSpec(channels=backbone_out_feats[3], stride=backbone_out_strides[3])}
     
     multi_scale_feature_extractor = build_encoder(opt, input_shape).to(device)
-    # 載入 multi_scale_feature_extractor 權重
+    #  multi_scale_feature_extractor 
     pixel_decoder_weights = {k.replace('sem_seg_head.pixel_decoder.', ''): v 
                             for k,v in ckpt.items() 
                             if 'sem_seg_head.pixel_decoder' in k}
@@ -87,7 +85,7 @@ def build_baseline_model(image_input, text_input, output_path="./compile_and_pro
     
     # build lang_encoder
     lang_encoder = build_language_encoder(opt).to(device)
-    # 載入 lang_encoder 權重
+    #  lang_encoder 
     lang_encoder.load_state_dict({k.replace('lang_encoder.', ''): v for k,v in ckpt.items() if 'lang_encoder' in k}, strict=False)
 
     with torch.no_grad():

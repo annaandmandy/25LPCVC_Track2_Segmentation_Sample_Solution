@@ -14,8 +14,19 @@ from typing import List, Optional
 import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
+from torch.nn.functional import tanh
 
+class DyT(nn.Module):
+    def __init__(self, c, init_alpha):
+        super().__init__()
+        self.alpha = nn.Parameter(torch.ones(1) * init_alpha)
+        self.r = nn.Parameter(torch.ones(c))
+        self.beta = nn.Parameter(torch.zeros(c))
 
+    def forward(self, x):
+        x = tanh(self.alpha * x)
+        return self.r * x + self.beta
+    
 class Transformer(nn.Module):
     def __init__(
         self,
@@ -34,13 +45,15 @@ class Transformer(nn.Module):
         encoder_layer = TransformerEncoderLayer(
             d_model, nhead, dim_feedforward, dropout, activation, normalize_before
         )
-        encoder_norm = nn.LayerNorm(d_model) if normalize_before else None
+        #encoder_norm = nn.LayerNorm(d_model) if normalize_before else None
+        encoder_norm = DyT(d_model, init_alpha=0.5) if normalize_before else None
         self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
 
         decoder_layer = TransformerDecoderLayer(
             d_model, nhead, dim_feedforward, dropout, activation, normalize_before
         )
-        decoder_norm = nn.LayerNorm(d_model)
+        #decoder_norm = nn.LayerNorm(d_model)
+        decoder_norm = DyT(d_model, init_alpha=0.5)
         self.decoder = TransformerDecoder(
             decoder_layer,
             num_decoder_layers,
@@ -168,8 +181,10 @@ class TransformerEncoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.linear2 = nn.Linear(dim_feedforward, d_model)
 
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
+        #self.norm1 = nn.LayerNorm(d_model)
+        #self.norm2 = nn.LayerNorm(d_model)
+        self.norm1 = DyT(d_model, init_alpha=0.5)
+        self.norm2 = DyT(d_model, init_alpha=0.5)
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
 
@@ -246,9 +261,12 @@ class TransformerDecoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.linear2 = nn.Linear(dim_feedforward, d_model)
 
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.norm3 = nn.LayerNorm(d_model)
+        # self.norm1 = nn.LayerNorm(d_model)
+        # self.norm2 = nn.LayerNorm(d_model)
+        # self.norm3 = nn.LayerNorm(d_model)
+        self.norm1 = DyT(d_model, init_alpha=0.5)
+        self.norm2 = DyT(d_model, init_alpha=0.5)
+        self.norm3 = DyT(d_model, init_alpha=0.5)
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
         self.dropout3 = nn.Dropout(dropout)

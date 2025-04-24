@@ -5,36 +5,28 @@
 # Written by Xueyan Zou (xueyan@cs.wisc.edu)
 # --------------------------------------------------------
 
-# Define Test/Trainer/Saving
 PIPELINE: XDecoderPipeline
 TRAINER: xdecoder
-SAVE_DIR: './data/output/test'
+SAVE_DIR: './data/output/test_swiglu'
 base_path: "./"
 
-# Resume Logistic
 RESUME: false
 WEIGHT: false
 RESET_DATA_LOADER: false
-RESUME_FROM: 'data/output/test/focalt_unicl_lang_finetune.yaml_conf~/run_31/00014072/default/model_state_dict.pt'
+RESUME_FROM: 'outputs/focalt_unicl_lang_finetune.yaml_conf~/run_13/00028144/default/model_state_dict.pt'
 EVAL_AT_START: False
 
-# Logging and Debug
 WANDB: True
 LOG_EVERY: 100
 FIND_UNUSED_PARAMETERS: false
 
-# Speed up training
 FP16: false
 PORT: '36873'
 
-# misc
 LOADER:
   JOINT: True
   KEY_DATASET: 'coco'
 
-##################
-# Task settings
-##################
 VERBOSE: true
 MODEL:
   NAME: xdecoder_model
@@ -48,10 +40,10 @@ MODEL:
     ARCH: vlpencoder
     NAME: transformer
     TOKENIZER: clip
-    CONTEXT_LENGTH: 77 # 77
+    CONTEXT_LENGTH: 77
     WIDTH: 512
     HEADS: 8
-    LAYERS: 12 # 6
+    LAYERS: 12
     AUTOGRESSIVE: True
   BACKBONE:
     NAME: focal_dw
@@ -137,7 +129,7 @@ MODEL:
     TRAIN_NUM_POINTS: 12544
     OVERSAMPLE_RATIO: 3.0
     IMPORTANCE_SAMPLE_RATIO: 0.75
-    DEC_LAYERS: 10  # 9 decoder layers, add one for the loss on learnable query
+    DEC_LAYERS: 10
     TOP_GROUNDING_LAYERS: 3
     TOP_CAPTION_LAYERS: 3
     TOP_CAPTIONING_LAYERS: 3
@@ -220,17 +212,8 @@ INPUT:
   PIXEL_STD: [58.395, 57.120, 57.375]
 
 DATASETS:
-  # TRAIN: ["coco_2017_train_panoptic_filtall_with_sem_seg_caption_grounding"]
   TRAIN: ["coco_2017_train_panoptic_filtall_with_sem_seg_caption_grounding"]
-  # open vocabulary segmentation evaluation.
-  # TEST: ["ade20k_panoptic_val"]
-  # TEST: ["refcocog_val_umd"]
-  # TEST: ["vlp_val"]
   TEST: ["refcocog_val_umd"]
-  # TEST: ["coco_2017_val_panoptic_with_sem_seg", "vlp_captioning_val", "refcocog_val_umd", "vlp_val", "ade20k_panoptic_val"]
-  # TEST: ["ade20k_panoptic_val", "ade20k_full_sem_seg_val", "sunrgbd_37_val_seg", "scannet_21_val_seg", "scannet_21_panoptic_val", "scannet_41_val_seg", "cityscapes_fine_panoptic_val", "cityscapes_fine_instance_seg_val", "cityscapes_fine_sem_seg_val", "bdd10k_val_sem_seg", "bdd10k_40_panoptic_val"]
-  # Supervised metrics evaluation.
-  # TEST: ["vlp_captioning_val", "refcocog_val_umd", "vlp_val"]
   SIZE_DIVISIBILITY: 32
   PROPOSAL_FILES_TRAIN: []
 
@@ -241,7 +224,6 @@ DATALOADER:
   SAMPLER_TRAIN: "TrainingSampler"
   ASPECT_RATIO_GROUPING: True
 
-# Detectron2 training config for optimizer and lr scheduler
 SOLVER:
   BASE_LR: 0.00001
   STEPS: [0.88889, 0.96296]
@@ -261,13 +243,12 @@ SOLVER:
   CLIP_GRADIENTS:
     ENABLED: True
     CLIP_TYPE: "full_model"
-    CLIP_VALUE: 5.0 # 0.01
+    CLIP_VALUE: 5.0
     NORM_TYPE: 2.0
   AMP:
     ENABLED: True
   MAX_NUM_EPOCHS: 5
 
-# Evaluation Dataset
 ADE20K:
   INPUT:
     MIN_SIZE_TRAIN: 640
@@ -282,14 +263,13 @@ ADE20K:
       SIZE: (640, 640)
       SINGLE_CATEGORY_MAX_AREA: 1.0
     COLOR_AUG_SSD: True
-    SIZE_DIVISIBILITY: 640  # used in dataset mapper
+    SIZE_DIVISIBILITY: 640
     DATASET_MAPPER_NAME: "mask_former_panoptic"
     FORMAT: "RGB"
   DATASET:
     DATASET: 'ade'
   TEST:
     BATCH_SIZE_TOTAL: 2
-
 
 REF:
   INPUT:
@@ -354,7 +334,7 @@ BDD:
 
 CITY:
   INPUT:
-    MIN_SIZE_TRAIN: 1024 # !!python/object/apply:eval ["[int(x * 0.1 * 1024) for x in range(5, 21)]"]
+    MIN_SIZE_TRAIN: 1024
     MIN_SIZE_TRAIN_SAMPLING: "choice"
     MIN_SIZE_TEST: 1024
     MAX_SIZE_TRAIN: 4096
