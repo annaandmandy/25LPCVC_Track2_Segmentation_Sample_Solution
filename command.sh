@@ -9,7 +9,7 @@ export QUALCOMM_AI_HUB_KEY="44165a068eebd71635bbb8e9198756c50e392b02"
 # CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 
 # works with baseline model and FFN layer replacement
 python entry.py train \
-    --conf_files configs/xdecoder/focalt_unicl_lang_swiGLUDYT.yaml \
+    --conf_files configs/xdecoder/focalt_unicl_lang_linearattention.yaml \
     --overrides \
     FP16 True \
     PORT 36874 \

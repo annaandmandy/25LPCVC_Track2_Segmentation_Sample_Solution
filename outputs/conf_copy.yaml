@@ -314,7 +314,7 @@ REF:
     BATCH_SIZE_TOTAL: 1
 RESET_DATA_LOADER: false
 RESUME: false
-RESUME_FROM: outputs/focalt_unicl_lang_finetune.yaml_conf~/run_13/00028144/default/model_state_dict.pt
+RESUME_FROM: xdecoder_data/pretrained_weights/focalt_in21k_yfcc_gcc_xdecoder_unicl.pt
 SAVE_DIR: outputs
 SCAN:
   DATALOADER:
@@ -411,7 +411,7 @@ WEIGHT: true
 base_path: ./
 command: train
 conf_files:
-- configs/xdecoder/focalt_unicl_lang_swiGLUDYT.yaml
+- configs/xdecoder/focalt_unicl_lang_linearattention.yaml
 device: !!python/object/apply:torch.device
 - cuda
 - 0

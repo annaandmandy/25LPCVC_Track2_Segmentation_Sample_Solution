@@ -49,7 +49,7 @@ def build_baseline_model(image_input, text_input, output_path="./compile_and_pro
         XDecoder model instance
     """
     # load configs and pretrained weights
-    conf_file = "./configs/xdecoder/focalt_unicl_lang_swiGLUDYT.yaml"
+    conf_file = "./configs/xdecoder/focalt_unicl_lang_linearattention.yaml"
     opt = load_opt_from_config_files([conf_file])
 
     pretrained_path = opt['RESUME_FROM']

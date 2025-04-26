@@ -19,7 +19,7 @@ from detectron2.layers import Conv2d
 import fvcore.nn.weight_init as weight_init
 
 from .registry import register_decoder
-from .modules import SelfAttentionLayer, CrossAttentionLayer, FFNLayer, MLP
+from .modules import SelfAttentionLayer, CrossAttentionLayer, FFNLayer, MLP, GatedAttentionUnit
 from ...utils import configurable
 from ...modules import PositionEmbeddingSine
 
@@ -99,12 +99,13 @@ class XDecoder(nn.Module):
             )
 
             self.transformer_ffn_layers.append(
-                FFNLayer(
-                    d_model=hidden_dim,
-                    dim_feedforward=dim_feedforward,
-                    dropout=0.0,
-                    normalize_before=pre_norm,
-                )
+                GatedAttentionUnit(hidden_dim) # Z added this
+                # FFNLayer(
+                #     d_model=hidden_dim,
+                #     dim_feedforward=dim_feedforward,
+                #     dropout=0.0,
+                #     normalize_before=pre_norm,
+                # ) Z comment out this
             )
 
         self.decoder_norm = nn.LayerNorm(hidden_dim)

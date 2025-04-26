@@ -172,7 +172,7 @@ def compile_and_profile_aihub(model_path="./compile_and_profile/onnx/model.onnx"
     # Submit compilation job to AIHub
     compile_job = hub.submit_compile_job(
         model=model_path,
-        name="lpcvc25_track2_swigludyt",
+        name="lpcvc25_track2_addlinearattention",
         device=hub.Device(deploy_device),
         options="--target_runtime qnn_context_binary",
     )
@@ -189,7 +189,7 @@ def compile_and_profile_aihub(model_path="./compile_and_profile/onnx/model.onnx"
     # Profile model if requested
     if profile:
         profile_job = hub.submit_profile_job(
-            name="lpcvc25_track2_swigludyt",
+            name="lpcvc25_track2_addlinearattention",
             model=model, 
             device=hub.Device(deploy_device)
         )
@@ -219,7 +219,7 @@ def inference_aihub(model, image_input, text_input, deploy_device="Snapdragon X 
     
     # Submit inference job
     inference_job = hub.submit_inference_job(
-        name="lpcvc25_track2_swigludyt",
+        name="lpcvc25_track2_addlinearattention",
         model=model,
         device=hub.Device(deploy_device),
         inputs=aihub_inputs
