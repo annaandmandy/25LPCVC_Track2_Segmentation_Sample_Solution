@@ -314,7 +314,7 @@ REF:
     BATCH_SIZE_TOTAL: 1
 RESET_DATA_LOADER: false
 RESUME: false
-RESUME_FROM: xdecoder_data/pretrained_weights/focalt_in21k_yfcc_gcc_xdecoder_unicl.pt
+RESUME_FROM: outputs/focalt_unicl_lang_linearattention.yaml_conf~/run_1/00028144/default/model_state_dict.pt
 SAVE_DIR: outputs
 SCAN:
   DATALOADER:

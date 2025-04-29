@@ -15,13 +15,12 @@ Use compile_AIHUB.sh to compile
 2. Change compile_profile_inference_aihub.py submitted name to certain model name
 
 ## Optimize Model
-1. DyT: Optimize the FNN layer in xdecoder
+1. DyT: Optimize the normalization layer applys Dynamic Tanh in attention blocks, FFN blocks,
+ normalization layer of encoder decoder in xdecoder. 
 2. SwiGLU: Integrate SwiGLU activation into the Feed-Forward Networks (FFN) by replacing the traditional two-layer MLP structure with a gated variant. Specifically, we will implement two parallel linear projections (linear_v and linear_g) and apply the SiLU activation with gating, aiming to improve model capacity, stability, and efficiency.
 3. SwiGLU + DyT: adding c attention and 
-4. linear Attention
-
-
-
+4. Linear Attention: Replace standard Multihead Attention with Linear Attention (Performer-style) to enhance computational efficiency. We replaced the traditional softmax attention mechanism with a linear feature map approximation, significantly reducing the quadratic complexity of attention computation to linear time. This improves scalability to high-resolution inputs, accelerates training, and reduces GPU memory usage without sacrificing segmentation performance.
+5. GAU: Integrate Gated Attention Units (GAU) in place of standard feed-forward networks to further refine model capacity and dynamic feature selection. This enhances expressiveness and stability, while keeping the model lightweight and well-suited for low-power vision applications.
 
 ## Performance
 Result shows that after replacing normalization function to DyT layer, the GPU Power Usage drops 12%. 

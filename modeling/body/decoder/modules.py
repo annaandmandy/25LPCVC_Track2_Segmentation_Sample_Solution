@@ -211,7 +211,8 @@ class DyT(nn.Module):
 class GatedAttentionUnit(nn.Module):
     def __init__(self, d_model, dropout=0.1):
         super().__init__()
-        self.norm = nn.LayerNorm(d_model)
+        self.norm = DyT(d_model, init_alpha=0.5)
+        #self.norm = nn.LayerNorm(d_model)
         self.linear_g = nn.Linear(d_model, d_model)
         self.linear_v = nn.Linear(d_model, d_model)
         self.linear_out = nn.Linear(d_model, d_model)

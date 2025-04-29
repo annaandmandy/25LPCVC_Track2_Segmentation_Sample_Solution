@@ -13,7 +13,7 @@ base_path: "./"
 RESUME: false
 WEIGHT: false
 RESET_DATA_LOADER: false
-RESUME_FROM: 'outputs/focalt_unicl_lang_linearattention.yaml_conf~/run_1/00028144/default/model_state_dict.pt'
+RESUME_FROM: 'outputs/focalt_unicl_lang_linearattention.yaml_conf~/run_2/00028144/default/model_state_dict.pt'
 EVAL_AT_START: False
 
 WANDB: True
