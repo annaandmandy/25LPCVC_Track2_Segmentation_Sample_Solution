@@ -35,7 +35,7 @@ from utils.arguments import load_opt_from_config_files
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-def build_baseline_model(image_input, text_input, output_path="./compile_and_profile", test_torch_model_local=True):
+def build_baseline_model(image_input, text_input, output_path="./compile_and_profile", test_torch_model_local=True, conf_file="./configs/xdecoder/focalt_unicl_lang_finetune.yaml"):
     """
     Build the XDecoder baseline model and optionally run inference.
     
@@ -49,7 +49,7 @@ def build_baseline_model(image_input, text_input, output_path="./compile_and_pro
         XDecoder model instance
     """
     # load configs and pretrained weights
-    conf_file = "./configs/xdecoder/focalt_unicl_lang_linearattention.yaml"
+
     opt = load_opt_from_config_files([conf_file])
 
     pretrained_path = opt['RESUME_FROM']
@@ -186,6 +186,10 @@ class XDecoder(nn.Module):
         """
         # downsample image for faster inference
         down_sample_size = 256
+        device = image_input.device  # Get the device of the input tensor
+        self.pixel_mean = self.pixel_mean.to(device)  # Move pixel_mean to the same device
+        self.pixel_std = self.pixel_std.to(device)    # Move pixel_std to the same device
+
         images = (image_input - self.pixel_mean) / self.pixel_std
         images = F.interpolate(images, size=down_sample_size, mode='bilinear', align_corners=False, antialias=False)
 
@@ -253,6 +257,10 @@ class XDecoder(nn.Module):
         Returns:
             Binary prediction mask (1024, 1024)
         """
+        device = next(self.parameters()).device
+        image_input = image_input.to(device)
+        text_input = (text_input[0].to(device), text_input[1].to(device))
+
         images, tokens = self.pre_processing(image_input, text_input)
 
         visual_features = self.backbone(images) # return dict, {'res2', 'res3', 'res4', 'res5'}

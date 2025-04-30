@@ -32,3 +32,5 @@ gradio
 onnxruntime
 onnx
 qai-hub
+huggingface-hub
+numpy
