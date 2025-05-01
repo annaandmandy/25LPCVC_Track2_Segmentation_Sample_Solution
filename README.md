@@ -14,6 +14,8 @@ Use compile_AIHUB.sh to compile
 1. Change config file in build_baseline_model.py
 2. Change compile_profile_inference_aihub.py submitted name to certain model name
 
+Use python deploy.py to call out an interface to run the model and test.
+
 ## Optimize Model
 1. DyT: Optimize the normalization layer applys Dynamic Tanh in attention blocks, FFN blocks,
  normalization layer of encoder decoder in xdecoder. 
@@ -22,7 +24,9 @@ Use compile_AIHUB.sh to compile
 4. Linear Attention: Replace standard Multihead Attention with Linear Attention (Performer-style) to enhance computational efficiency. We replaced the traditional softmax attention mechanism with a linear feature map approximation, significantly reducing the quadratic complexity of attention computation to linear time. This improves scalability to high-resolution inputs, accelerates training, and reduces GPU memory usage without sacrificing segmentation performance.
 5. GAU: Integrate Gated Attention Units (GAU) in place of standard feed-forward networks to further refine model capacity and dynamic feature selection. This enhances expressiveness and stability, while keeping the model lightweight and well-suited for low-power vision applications.
 
+These adjustment are made in modeling/body/decoder/modules.py and xdecoder.py files.
+
 ## Performance
-Result shows that after replacing normalization function to DyT layer, the GPU Power Usage drops 12%. 
+Tho overall best model, which applies DyT, SwiGLU, Linear attention and gated attention has an increase of accuracy and decrease in GPU usage comparing to the baseline model, and it was able to mask the dog image in the example test case.
 
 
