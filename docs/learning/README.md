@@ -26,7 +26,7 @@
 | 00a | 背景知識：為什麼要學、CNN/ViT/CLIP/YOLO/DETR、這套架構過時了嗎 | 無 | [00a-background.md](00a-background.md) |
 | 00 | Repo 地圖：資料夾怎麼組織、哪些用得到、哪些可以忽略 | 全部 | [00-repo-map.md](00-repo-map.md) |
 | 01 | 全局地圖：一張圖 + 一句話怎麼變成 mask | `compile_and_profile/build_baseline_model.py` | [01-overview.md](01-overview.md) |
-| 02 | 影像 Backbone：FocalNet，從 CNN 接到 Transformer | `modeling/vision/backbone/focal_dw.py` | 待寫 |
+| 02 | 影像 Backbone：FocalNet，從 CNN 接到 Transformer | `modeling/vision/backbone/focal_dw.py` | [02-backbone-focalnet.md](02-backbone-focalnet.md)，腳本 `scripts/02_inspect_backbone.py` |
 | 03 | Transformer 基礎 + Pixel Decoder（FPN + encoder） | `modeling/vision/encoder/transformer_encoder_fpn.py` | 待寫 |
 | 04 | 文字 Encoder（CLIP）與影像和文字的對齊 | `modeling/language/` | 待寫 |
 | 05 | X-Decoder 本體：queries、masked attention、預測頭 | `modeling/interface/xdecoder_qnn.py` | 待寫 |
